@@ -7,16 +7,16 @@ import com.badice.domain.interfaces.MovementPattern;
 /**
  * Representa un enemigo en el juego.
  */
-public class Enemy extends GameEntity implements Movable, Collidable {
+public abstract class Enemy extends GameEntity implements Movable, Collidable {
     private static final int DEFAULT_SPEED = 1;
     private static final String ENTITY_TYPE = "ENEMY";
 
     private int speed;
     private MovementPattern movementPattern;
     private Direction currentDirection;
-    private String enemyType; // Para diferentes tipos visuales
+    private String enemyType;
 
-    public Enemy(Position position, MovementPattern movementPattern, String enemyType) {
+    protected Enemy(Position position, MovementPattern movementPattern, String enemyType) {
         super(position);
         this.speed = DEFAULT_SPEED;
         this.movementPattern = movementPattern;

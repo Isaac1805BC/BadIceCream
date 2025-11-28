@@ -34,6 +34,6 @@ public class GameConfig {
     public static final String COLOR_ICE = "#87CEEB"; // Sky Blue
 
     private GameConfig() {
-        // Clase de utilidad, no instanciable
+        
     }
 }

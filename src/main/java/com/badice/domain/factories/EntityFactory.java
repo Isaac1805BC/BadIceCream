@@ -22,7 +22,7 @@ public class EntityFactory {
     public static Enemy createEnemy(int x, int y, String movementType, String enemyType) {
         Position position = new Position(x, y);
         MovementPattern pattern = createMovementPattern(movementType);
-        return new Enemy(position, pattern, enemyType);
+        return new BasicEnemy(position, pattern);
     }
 
     /**

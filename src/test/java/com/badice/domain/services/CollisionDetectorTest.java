@@ -33,7 +33,7 @@ class CollisionDetectorTest {
 
     @Test
     void testDetectPlayerCollisionWithEnemy() {
-        Enemy enemy = new Enemy(new Position(5, 5), null, "basic");
+        Enemy enemy = new BasicEnemy(new Position(5, 5), null);
         gameMap.addEntity(enemy);
 
         assertTrue(collisionDetector.detectEnemyPlayerCollision(enemy, player));
@@ -41,7 +41,7 @@ class CollisionDetectorTest {
 
     @Test
     void testNoCollisionWhenApart() {
-        Enemy enemy = new Enemy(new Position(8, 8), null, "basic");
+        Enemy enemy = new BasicEnemy(new Position(8, 8), null);
         gameMap.addEntity(enemy);
 
         assertFalse(collisionDetector.detectEnemyPlayerCollision(enemy, player));
