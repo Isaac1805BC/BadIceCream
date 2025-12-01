@@ -18,7 +18,7 @@ public class GameMap {
     private final List<IceBlock> iceBlocks;
     private final List<Fruit> fruits;
     private final List<Enemy> enemies;
-    private Player player;
+    private final List<Player> players;
 
     public GameMap(int width, int height, int cellSize) {
         this.width = width;
@@ -30,6 +30,7 @@ public class GameMap {
         this.iceBlocks = new ArrayList<>();
         this.fruits = new ArrayList<>();
         this.enemies = new ArrayList<>();
+        this.players = new ArrayList<>();
     }
 
     public int getWidth() {
@@ -45,11 +46,19 @@ public class GameMap {
     }
 
     public Player getPlayer() {
-        return player;
+        return players.isEmpty() ? null : players.get(0);
+    }
+
+    public List<Player> getPlayers() {
+        return new ArrayList<>(players);
     }
 
     public void setPlayer(Player player) {
-        this.player = player;
+        this.players.clear();
+        addEntity(player);
+    }
+
+    public void addPlayer(Player player) {
         addEntity(player);
     }
 
@@ -82,7 +91,7 @@ public class GameMap {
 
             // Añadir a la lista específica según el tipo
             if (entity instanceof Player) {
-                this.player = (Player) entity;
+                this.players.add((Player) entity);
             } else if (entity instanceof Enemy) {
                 enemies.add((Enemy) entity);
             } else if (entity instanceof Fruit) {

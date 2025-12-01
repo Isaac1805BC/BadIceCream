@@ -1,6 +1,7 @@
 package com.badice.presentation.controller;
 
 import com.badice.domain.config.GameConfig;
+import com.badice.domain.enums.GameMode;
 import com.badice.domain.services.GameEngine;
 import com.badice.domain.states.MenuState;
 import com.badice.domain.states.PlayingState;
@@ -47,7 +48,7 @@ public class GameController {
      */
     private void setupEventHandlers() {
         // Menu panel listeners
-        menuPanel.setPlayButtonListener(e -> startNewGame());
+        menuPanel.setPlayButtonListener(e -> showGameModeSelection());
         menuPanel.setSelectLevelButtonListener(e -> showLevelSelection());
         menuPanel.setExitButtonListener(e -> System.exit(0));
 
@@ -77,11 +78,34 @@ public class GameController {
     /**
      * Inicia un nuevo juego.
      */
-    public void startNewGame() {
-        gameEngine.startNewGame();
+    public void startNewGame(GameMode mode) {
+        gameEngine.startNewGame(mode);
         gameEngine.changeState(new PlayingState());
         showGamePanel();
         startGameLoop();
+    }
+
+    private void showGameModeSelection() {
+        String[] options = { "1 Player", "Player vs Player", "Player vs Machine", "Machine vs Machine" };
+        int choice = JOptionPane.showOptionDialog(mainFrame,
+                "Selecciona el modo de juego:",
+                "Modo de Juego",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]);
+
+        if (choice >= 0) {
+            GameMode mode = switch (choice) {
+                case 0 -> GameMode.ONE_PLAYER;
+                case 1 -> GameMode.PVP;
+                case 2 -> GameMode.PVM;
+                case 3 -> GameMode.MVM;
+                default -> GameMode.ONE_PLAYER;
+            };
+            startNewGame(mode);
+        }
     }
 
     /**

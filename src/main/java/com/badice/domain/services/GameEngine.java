@@ -6,6 +6,8 @@ import com.badice.domain.states.GameState;
 import com.badice.domain.states.MenuState;
 import com.badice.domain.factories.EntityFactory;
 import com.badice.domain.states.GameOverState;
+import com.badice.domain.states.GameOverState;
+import com.badice.domain.enums.GameMode;
 import java.util.List;
 
 /**
@@ -27,6 +29,13 @@ public class GameEngine {
     private boolean isPaused;
     private int currentLevelNumber;
 
+    // Sistema de fases
+    private int currentPhase;
+    private int totalPhases;
+
+    // Modo de juego
+    private GameMode currentMode;
+
     // Control de tiempo
     private long lastUpdateTime;
 
@@ -42,6 +51,11 @@ public class GameEngine {
         this.isPaused = false;
         this.currentLevelNumber = 1;
         this.lastUpdateTime = System.currentTimeMillis();
+        this.currentPhase = 1;
+        this.lastUpdateTime = System.currentTimeMillis();
+        this.currentPhase = 1;
+        this.totalPhases = 1;
+        this.currentMode = GameMode.ONE_PLAYER;
 
         // Comenzar en el estado de menú
         stateManager.changeState(new MenuState());
@@ -58,10 +72,6 @@ public class GameEngine {
 
         lastUpdateTime = currentTime;
     }
-
-    /**
-     * Actualiza todas las entidades del mapa.
-     */
 
     /**
      * Actualiza todas las entidades del mapa.
@@ -83,71 +93,106 @@ public class GameEngine {
             }
         }
 
-        // Detectar colisiones del jugador
-        Player player = currentMap.getPlayer();
-        if (player != null && player.isActive()) {
-            List<GameEntity> collisions = collisionDetector.detectPlayerCollisions(player, currentMap);
+        // Actualizar IA para jugadores máquina
+        updateAI();
 
-            for (GameEntity entity : collisions) {
-                if (entity instanceof Fruit) {
-                    Fruit fruit = (Fruit) entity;
-                    if (!fruit.isCollected()) {
-                        fruit.collect();
-                        scoreService.addFruitScore(fruit.getPoints());
+        // Detectar colisiones de los jugadores
+        List<Player> players = currentMap.getPlayers();
+        for (Player player : players) {
+            if (player != null && player.isActive()) {
+                List<GameEntity> collisions = collisionDetector.detectPlayerCollisions(player, currentMap);
+
+                for (GameEntity entity : collisions) {
+                    if (entity instanceof Fruit) {
+                        Fruit fruit = (Fruit) entity;
+                        if (!fruit.isCollected()) {
+                            fruit.collect();
+                            scoreService.addFruitScore(fruit.getPoints());
+                        }
+                    } else if (entity instanceof Enemy) {
+                        handlePlayerDeath(player);
+                        break; // Solo morir una vez por frame
                     }
-                } else if (entity instanceof Enemy) {
-                    handlePlayerDeath();
-                    break; // Solo morir una vez por frame
                 }
             }
+        }
+
+        // Verificar transición de fase
+        if (currentPhase < totalPhases && scoreService.areAllFruitsCollected()) {
+            spawnNextPhase();
         }
 
         // Actualizar todas las entidades
         currentMap.updateAllEntities();
     }
 
-    private void handlePlayerDeath() {
-        Player player = currentMap.getPlayer();
-        player.loseLife();
+    private void handlePlayerDeath(Player player) {
+        // Muerte instantánea - Game Over directo
+        // En multiplayer podríamos desactivar solo al jugador muerto
+        player.setInactive();
 
-        if (player.getLives() > 0) {
-            resetPositions();
-        } else {
+        // Si todos los jugadores están muertos, game over
+        boolean allDead = true;
+        for (Player p : currentMap.getPlayers()) {
+            if (p.isActive()) {
+                allDead = false;
+                break;
+            }
+        }
+
+        if (allDead) {
             changeState(new GameOverState());
         }
     }
 
     private void resetPositions() {
         // Resetear posición del jugador (asumiendo (1,1) como inicio por ahora)
-        // Idealmente guardaríamos la posición inicial en el mapa o jugador
-        if (currentMap != null && currentMap.getPlayer() != null) {
-            currentMap.getPlayer().setPosition(new Position(1, 1));
+        // Resetear posición del jugador (asumiendo (1,1) como inicio por ahora)
+        if (currentMap != null) {
+            List<Player> players = currentMap.getPlayers();
+            if (!players.isEmpty()) {
+                players.get(0).setPosition(new Position(1, 1));
+                if (players.size() > 1) {
+                    players.get(1).setPosition(new Position(13, 1));
+                }
+            }
         }
-
-        // Resetear enemigos a sus posiciones iniciales si fuera necesario
-        // Por ahora solo reseteamos al jugador para dar una oportunidad
     }
 
     /**
      * Mueve al jugador en una dirección.
      */
-    public boolean movePlayer(Direction direction) {
-        if (currentMap == null || currentMap.getPlayer() == null) {
+    public boolean movePlayer(Direction direction, int playerIndex) {
+        if (currentMap == null)
             return false;
-        }
 
-        return movementService.moveEntity(currentMap.getPlayer(), direction, currentMap);
+        List<Player> players = currentMap.getPlayers();
+        if (playerIndex < 0 || playerIndex >= players.size())
+            return false;
+
+        Player player = players.get(playerIndex);
+        if (!player.isActive())
+            return false;
+
+        return movementService.moveEntity(player, direction, currentMap);
     }
 
     /**
      * El jugador crea un bloque de hielo.
      */
-    public boolean playerCreateIce(Direction direction) {
-        if (currentMap == null || currentMap.getPlayer() == null) {
+    public boolean playerCreateIce(Direction direction, int playerIndex) {
+        if (currentMap == null)
             return false;
-        }
 
-        Position playerPos = currentMap.getPlayer().getPosition();
+        List<Player> players = currentMap.getPlayers();
+        if (playerIndex < 0 || playerIndex >= players.size())
+            return false;
+
+        Player player = players.get(playerIndex);
+        if (!player.isActive())
+            return false;
+
+        Position playerPos = player.getPosition();
         IceBlock ice = iceManager.createIceBlock(playerPos, direction, currentMap);
         return ice != null;
     }
@@ -155,12 +200,19 @@ public class GameEngine {
     /**
      * El jugador destruye un bloque de hielo.
      */
-    public boolean playerDestroyIce(Direction direction) {
-        if (currentMap == null || currentMap.getPlayer() == null) {
+    public boolean playerDestroyIce(Direction direction, int playerIndex) {
+        if (currentMap == null)
             return false;
-        }
 
-        Position playerPos = currentMap.getPlayer().getPosition();
+        List<Player> players = currentMap.getPlayers();
+        if (playerIndex < 0 || playerIndex >= players.size())
+            return false;
+
+        Player player = players.get(playerIndex);
+        if (!player.isActive())
+            return false;
+
+        Position playerPos = player.getPosition();
         return iceManager.destroyIceBlock(playerPos, direction, currentMap);
     }
 
@@ -170,9 +222,21 @@ public class GameEngine {
     private void createLevel(int levelNumber) {
         currentMap = EntityFactory.createDefaultMap();
 
-        // Crear jugador
-        Player player = EntityFactory.createPlayer(1, 1);
-        currentMap.setPlayer(player);
+        // Crear jugadores según el modo
+        if (currentMode == GameMode.ONE_PLAYER || currentMode == GameMode.PVM) {
+            Player p1 = EntityFactory.createPlayer(1, 1);
+            currentMap.addPlayer(p1);
+        } else if (currentMode == GameMode.PVP || currentMode == GameMode.MVM) {
+            Player p1 = EntityFactory.createPlayer(1, 1);
+            currentMap.addPlayer(p1);
+
+            Player p2 = EntityFactory.createPlayer(13, 1); // P2 en la esquina opuesta
+            // TODO: Asignar color diferente a P2 si es posible
+            currentMap.addPlayer(p2);
+        }
+
+        // Configurar IA si es necesario (PVM o MVM)
+        // La IA se maneja en updateAI()
 
         // Crear paredes del borde
         for (int x = 0; x < 15; x++) {
@@ -190,22 +254,81 @@ public class GameEngine {
         currentMap.addEntity(EntityFactory.createWall(9, 5));
         currentMap.addEntity(EntityFactory.createWall(11, 3));
 
-        // Añadir frutas
-        currentMap.addEntity(EntityFactory.createFruit(7, 5, "apple", 100));
-        currentMap.addEntity(EntityFactory.createFruit(3, 7, "cherry", 150));
-        currentMap.addEntity(EntityFactory.createFruit(11, 7, "strawberry", 150));
-        currentMap.addEntity(EntityFactory.createFruit(7, 2, "banana", 100));
-        currentMap.addEntity(EntityFactory.createFruit(7, 8, "orange", 100));
+        // Configurar fases y frutas según nivel
+        if (levelNumber == 1) {
+            // Nivel 1: Fase 1 (Plátanos) → Fase 2 (Uvas)
+            currentPhase = 1;
+            totalPhases = 2;
+
+            // Fase 1: Plátanos amarillos (100 puntos c/u)
+            // Posiciones que NO coinciden con bloques
+            currentMap.addEntity(EntityFactory.createFruit(2, 2, "platano", 100));
+            currentMap.addEntity(EntityFactory.createFruit(12, 2, "platano", 100));
+            currentMap.addEntity(EntityFactory.createFruit(7, 3, "platano", 100));
+
+            // Configurar score service - cuenta solo plátanos inicialmente
+            scoreService.setTotalFruits(3);
+        } else {
+            // Otros niveles: comportamiento por defecto
+            currentPhase = 1;
+            totalPhases = 1;
+            currentMap.addEntity(EntityFactory.createFruit(7, 5, "apple", 100));
+            scoreService.setTotalFruits(1);
+        }
 
         // Añadir enemigos
         currentMap.addEntity(EntityFactory.createEnemy(13, 9, "horizontal", "basic"));
         currentMap.addEntity(EntityFactory.createEnemy(1, 9, "vertical", "basic"));
 
-        // Configurar score service
-        scoreService.setTotalFruits(5);
         scoreService.setCurrentLevel(levelNumber);
 
         resetGameTimer();
+    }
+
+    /**
+     * Spawns la siguiente fase de frutas.
+     */
+    private void spawnNextPhase() {
+        currentPhase++;
+
+        if (currentLevelNumber == 1 && currentPhase == 2) {
+            // Nivel 1, Fase 2: Spawner uvas moradas
+            // Posiciones que NO coinciden con bloques
+            currentMap.addEntity(EntityFactory.createFruit(2, 7, "uva", 50));
+            currentMap.addEntity(EntityFactory.createFruit(12, 7, "uva", 50));
+            currentMap.addEntity(EntityFactory.createFruit(7, 7, "uva", 50));
+            currentMap.addEntity(EntityFactory.createFruit(4, 4, "uva", 50));
+            currentMap.addEntity(EntityFactory.createFruit(10, 4, "uva", 50));
+
+            // Actualizar score service para contar uvas
+            scoreService.nextPhase(5); // 5 uvas
+        }
+    }
+
+    /**
+     * Verifica si se cumple la condición de victoria.
+     */
+    public boolean checkVictoryCondition() {
+        // Victoria solo si estamos en la última fase y todas las frutas están
+        // recolectadas
+        return currentPhase >= totalPhases && scoreService.areAllFruitsCollected();
+    }
+
+    /**
+     * Verifica si se cumple la condición de derrota.
+     */
+    public boolean checkDefeatCondition() {
+        if (currentMap == null)
+            return true;
+
+        boolean allDead = true;
+        for (Player p : currentMap.getPlayers()) {
+            if (p.isActive() && p.getLives() > 0) {
+                allDead = false;
+                break;
+            }
+        }
+        return allDead;
     }
 
     /**
@@ -239,25 +362,11 @@ public class GameEngine {
     /**
      * Inicia un nuevo juego.
      */
-    public void startNewGame() {
+    public void startNewGame(GameMode mode) {
+        this.currentMode = mode;
         currentLevelNumber = 1;
         scoreService.resetCurrentScore();
         loadCurrentLevel();
-    }
-
-    /**
-     * Verifica si se cumple la condición de victoria.
-     */
-    public boolean checkVictoryCondition() {
-        return scoreService.areAllFruitsCollected();
-    }
-
-    /**
-     * Verifica si se cumple la condición de derrota.
-     */
-    public boolean checkDefeatCondition() {
-        Player player = currentMap != null ? currentMap.getPlayer() : null;
-        return player == null || !player.isActive() || player.getLives() <= 0;
     }
 
     /**
@@ -330,5 +439,45 @@ public class GameEngine {
 
     public IceManager getIceManager() {
         return iceManager;
+    }
+
+    private void updateAI() {
+        if (currentMap == null)
+            return;
+
+        List<Player> players = currentMap.getPlayers();
+
+        // Determinar qué jugadores son máquinas
+        boolean p1IsMachine = (currentMode == GameMode.MVM);
+        boolean p2IsMachine = (currentMode == GameMode.PVM || currentMode == GameMode.MVM);
+
+        if (p1IsMachine && players.size() > 0) {
+            moveMachinePlayer(players.get(0), 0);
+        }
+
+        if (p2IsMachine && players.size() > 1) {
+            moveMachinePlayer(players.get(1), 1);
+        }
+    }
+
+    private void moveMachinePlayer(Player player, int playerIndex) {
+        if (!player.isActive())
+            return;
+
+        // Lógica simple: moverse aleatoriamente o hacia una fruta
+        // Por ahora, movimiento aleatorio simple cada ciertos frames
+        if (Math.random() < 0.05) { // 5% de probabilidad de cambio de dirección por frame
+            Direction[] dirs = Direction.values();
+            Direction randomDir = dirs[(int) (Math.random() * dirs.length)];
+            movePlayer(randomDir, playerIndex);
+        }
+
+        // Intentar moverse en la dirección actual
+        if (!movePlayer(player.getCurrentDirection(), playerIndex)) {
+            // Si choca, cambiar dirección
+            Direction[] dirs = Direction.values();
+            Direction randomDir = dirs[(int) (Math.random() * dirs.length)];
+            movePlayer(randomDir, playerIndex);
+        }
     }
 }

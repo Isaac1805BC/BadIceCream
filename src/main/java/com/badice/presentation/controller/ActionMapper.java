@@ -21,16 +21,35 @@ public class ActionMapper {
      * Procesa una tecla presionada y ejecuta la acción correspondiente.
      */
     public void handleKeyPress(int keyCode) {
-        // Movimiento del jugador (flechas o WASD)
-        Direction direction = getDirectionFromKey(keyCode);
-        if (direction != null && gameEngine.getStateManager().isInState(PlayingState.class)) {
-            gameEngine.movePlayer(direction);
-            return;
+        if (gameEngine.getStateManager().isInState(PlayingState.class)) {
+            // Player 1 Controls (WASD)
+            Direction d1 = getDirectionFromKeyP1(keyCode);
+            if (d1 != null) {
+                gameEngine.movePlayer(d1, 0); // 0 = Player 1
+                return;
+            }
+
+            // Player 2 Controls (Arrows)
+            Direction d2 = getDirectionFromKeyP2(keyCode);
+            if (d2 != null) {
+                gameEngine.movePlayer(d2, 1); // 1 = Player 2
+                return;
+            }
+
+            // Actions
+            if (keyCode == KeyEvent.VK_SPACE) {
+                handleIceActionP1();
+                return;
+            }
+            if (keyCode == KeyEvent.VK_ENTER) {
+                handleIceActionP2();
+                return;
+            }
         }
 
         // Otras acciones
         switch (keyCode) {
-            case KeyEvent.VK_SPACE -> handleIceAction();
+            // case KeyEvent.VK_SPACE -> handleIceAction(); // Ya manejado arriba
             case KeyEvent.VK_P -> handlePauseToggle();
             case KeyEvent.VK_ESCAPE -> handleEscape();
             case KeyEvent.VK_R -> handleRestart();
@@ -40,12 +59,22 @@ public class ActionMapper {
     /**
      * Convierte una tecla a una dirección.
      */
-    private Direction getDirectionFromKey(int keyCode) {
+    private Direction getDirectionFromKeyP1(int keyCode) {
         return switch (keyCode) {
-            case KeyEvent.VK_UP, KeyEvent.VK_W -> Direction.UP;
-            case KeyEvent.VK_DOWN, KeyEvent.VK_S -> Direction.DOWN;
-            case KeyEvent.VK_LEFT, KeyEvent.VK_A -> Direction.LEFT;
-            case KeyEvent.VK_RIGHT, KeyEvent.VK_D -> Direction.RIGHT;
+            case KeyEvent.VK_W -> Direction.UP;
+            case KeyEvent.VK_S -> Direction.DOWN;
+            case KeyEvent.VK_A -> Direction.LEFT;
+            case KeyEvent.VK_D -> Direction.RIGHT;
+            default -> null;
+        };
+    }
+
+    private Direction getDirectionFromKeyP2(int keyCode) {
+        return switch (keyCode) {
+            case KeyEvent.VK_UP -> Direction.UP;
+            case KeyEvent.VK_DOWN -> Direction.DOWN;
+            case KeyEvent.VK_LEFT -> Direction.LEFT;
+            case KeyEvent.VK_RIGHT -> Direction.RIGHT;
             default -> null;
         };
     }
@@ -53,21 +82,34 @@ public class ActionMapper {
     /**
      * Maneja la acción de crear/destruir hielo.
      */
-    private void handleIceAction() {
+    private void handleIceActionP1() {
+        handleIceAction(0);
+    }
+
+    private void handleIceActionP2() {
+        handleIceAction(1);
+    }
+
+    private void handleIceAction(int playerIndex) {
         if (!gameEngine.getStateManager().isInState(PlayingState.class)) {
             return;
         }
 
-        var player = gameEngine.getPlayer();
-        if (player != null) {
+        // Obtener lista de jugadores y verificar índice
+        var players = gameEngine.getCurrentMap().getPlayers();
+        if (playerIndex < 0 || playerIndex >= players.size())
+            return;
+
+        var player = players.get(playerIndex);
+        if (player != null && player.isActive()) {
             Direction direction = player.getCurrentDirection();
 
             // Intentar destruir hielo primero
-            boolean destroyed = gameEngine.playerDestroyIce(direction);
+            boolean destroyed = gameEngine.playerDestroyIce(direction, playerIndex);
 
             // Si no se destruyó hielo, intentar crear
             if (!destroyed) {
-                gameEngine.playerCreateIce(direction);
+                gameEngine.playerCreateIce(direction, playerIndex);
             }
         }
     }

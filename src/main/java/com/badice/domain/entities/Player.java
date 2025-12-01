@@ -18,7 +18,7 @@ public class Player extends GameEntity implements Movable, Collidable {
     public Player(Position position) {
         super(position);
         this.speed = DEFAULT_SPEED;
-        this.lives = 3;
+        this.lives = 1; // Solo 1 vida - muerte instantánea
         this.score = 0;
         this.currentDirection = Direction.RIGHT;
     }
@@ -47,6 +47,10 @@ public class Player extends GameEntity implements Movable, Collidable {
         if (lives <= 0) {
             this.active = false;
         }
+    }
+
+    public void setInactive() {
+        this.active = false;
     }
 
     public void addLife() {

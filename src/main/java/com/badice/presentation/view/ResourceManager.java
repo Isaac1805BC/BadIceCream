@@ -77,6 +77,13 @@ public class ResourceManager {
     }
 
     /**
+     * Carga un background del juego.
+     */
+    public BufferedImage getBackground(String backgroundName) {
+        return loadImage("backgrounds/" + backgroundName + ".jpg");
+    }
+
+    /**
      * Limpia la caché de imágenes.
      */
     public void clearCache() {

@@ -65,6 +65,36 @@ public class InputHandler implements KeyListener {
     }
 
     /**
+     * Obtiene la dirección para el Jugador 1 (WASD).
+     */
+    public Direction getPlayer1Direction() {
+        if (isKeyPressed(KeyEvent.VK_W))
+            return Direction.UP;
+        if (isKeyPressed(KeyEvent.VK_S))
+            return Direction.DOWN;
+        if (isKeyPressed(KeyEvent.VK_A))
+            return Direction.LEFT;
+        if (isKeyPressed(KeyEvent.VK_D))
+            return Direction.RIGHT;
+        return null;
+    }
+
+    /**
+     * Obtiene la dirección para el Jugador 2 (Flechas).
+     */
+    public Direction getPlayer2Direction() {
+        if (isKeyPressed(KeyEvent.VK_UP))
+            return Direction.UP;
+        if (isKeyPressed(KeyEvent.VK_DOWN))
+            return Direction.DOWN;
+        if (isKeyPressed(KeyEvent.VK_LEFT))
+            return Direction.LEFT;
+        if (isKeyPressed(KeyEvent.VK_RIGHT))
+            return Direction.RIGHT;
+        return null;
+    }
+
+    /**
      * Limpia todas las teclas presionadas.
      */
     public void clear() {

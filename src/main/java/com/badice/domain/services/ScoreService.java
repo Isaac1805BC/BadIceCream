@@ -78,6 +78,14 @@ public class ScoreService {
     }
 
     /**
+     * Avanza a la siguiente fase dentro del mismo nivel.
+     */
+    public void nextPhase(int fruitsInNextPhase) {
+        fruitsCollected = 0;
+        totalFruits = fruitsInNextPhase;
+    }
+
+    /**
      * Verifica si se han recolectado todas las frutas del nivel.
      */
     public boolean areAllFruitsCollected() {

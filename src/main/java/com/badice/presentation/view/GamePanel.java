@@ -8,6 +8,7 @@ import com.badice.domain.states.PausedState;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 /**
  * Panel principal donde se dibuja el juego.
@@ -16,11 +17,15 @@ public class GamePanel extends JPanel {
     private final GameEngine gameEngine;
     private final EntityRenderer entityRenderer;
     private final HUDRenderer hudRenderer;
+    private final BufferedImage backgroundImage;
 
     public GamePanel(GameEngine gameEngine) {
         this.gameEngine = gameEngine;
         this.entityRenderer = new EntityRenderer(32); // 32px por celda
         this.hudRenderer = new HUDRenderer();
+
+        // Cargar background
+        this.backgroundImage = ResourceManager.getInstance().getBackground("game_background");
 
         setBackground(Color.BLACK);
         setFocusable(true);
@@ -48,6 +53,13 @@ public class GamePanel extends JPanel {
 
         // Aplicar offset para centrar
         g2d.translate(horizontalOffset, verticalOffset);
+
+        // Renderizar background si está disponible
+        if (backgroundImage != null) {
+            // Dibujar el background escalado para cubrir todo el área del mapa
+            int mapPixelHeight = map.getHeight() * 32;
+            g2d.drawImage(backgroundImage, 0, 0, mapPixelWidth, mapPixelHeight, null);
+        }
 
         // Renderizar fondo/grid
         entityRenderer.renderGrid(g2d, map.getWidth(), map.getHeight());

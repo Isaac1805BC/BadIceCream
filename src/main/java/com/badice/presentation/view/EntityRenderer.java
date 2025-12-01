@@ -73,10 +73,48 @@ public class EntityRenderer {
             return;
         }
 
-        g.setColor(Color.YELLOW);
+        // Colores según tipo de fruta
+        Color mainColor, borderColor;
+        String type = fruit.getFruitType().toLowerCase();
+
+        switch (type) {
+            case "banana":
+            case "platano":
+                mainColor = new Color(255, 215, 0); // Amarillo dorado
+                borderColor = new Color(218, 165, 32);
+                break;
+            case "uva":
+            case "grape":
+                mainColor = new Color(128, 0, 128); // Morado
+                borderColor = new Color(75, 0, 130);
+                break;
+            case "cereza":
+            case "cherry":
+                mainColor = new Color(220, 20, 60); // Rojo cereza
+                borderColor = new Color(139, 0, 0);
+                break;
+            case "pina":
+            case "piña":
+            case "pineapple":
+                mainColor = new Color(255, 176, 0); // Dorado/naranja
+                borderColor = new Color(255, 140, 0);
+                break;
+            case "cactus":
+                mainColor = new Color(34, 139, 34); // Verde bosque
+                borderColor = new Color(0, 100, 0);
+                break;
+            default:
+                mainColor = Color.YELLOW;
+                borderColor = Color.ORANGE;
+        }
+
+        g.setColor(mainColor);
         g.fillOval(x + 6, y + 6, cellSize - 12, cellSize - 12);
-        g.setColor(Color.ORANGE);
+        g.setColor(borderColor);
         g.drawOval(x + 6, y + 6, cellSize - 12, cellSize - 12);
+        // Añadir brillo
+        g.setColor(new Color(255, 255, 255, 100));
+        g.fillOval(x + 10, y + 10, 6, 6);
     }
 
     private void renderIceBlock(Graphics2D g, IceBlock ice, int x, int y) {
@@ -107,11 +145,10 @@ public class EntityRenderer {
      * Renderiza el fondo/grid del mapa.
      */
     public void renderGrid(Graphics2D g, int width, int height) {
-        g.setColor(new Color(20, 20, 40));
-        g.fillRect(0, 0, width * cellSize, height * cellSize);
+        // NO dibujar fondo sólido aquí - el background se dibuja en GamePanel
 
-        // Grid
-        g.setColor(new Color(40, 40, 60));
+        // Grid semi-transparente para que se vea el background
+        g.setColor(new Color(255, 255, 255, 30)); // Blanco muy transparente
         for (int x = 0; x <= width; x++) {
             g.drawLine(x * cellSize, 0, x * cellSize, height * cellSize);
         }
