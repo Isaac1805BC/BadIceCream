@@ -23,7 +23,7 @@ class CollisionDetectorTest {
 
     @Test
     void testDetectPlayerCollisionWithFruit() {
-        Fruit fruit = new Fruit(new Position(5, 5), "apple", 100);
+        Fruit fruit = new BasicFruit(new Position(5, 5), "apple", 100);
         gameMap.addEntity(fruit);
 
         var collisions = collisionDetector.detectPlayerCollisions(player, gameMap);

@@ -59,13 +59,27 @@ public class EntityRenderer {
     }
 
     private void renderEnemy(Graphics2D g, Enemy enemy, int x, int y) {
-        g.setColor(Color.RED);
-        g.fillRect(x + 4, y + 4, cellSize - 8, cellSize - 8);
-        g.setColor(Color.DARK_GRAY);
-
-        // Ojos
-        g.fillOval(x + 8, y + 10, 6, 6);
-        g.fillOval(x + cellSize - 14, y + 10, 6, 6);
+        if (enemy instanceof PotEnemy) {
+            // Maceta (pot): brown pot with green plant
+            // Pot
+            g.setColor(new Color(139, 69, 19)); // Brown
+            g.fillRect(x + 6, y + cellSize - 12, cellSize - 12, 10);
+            // Plant
+            g.setColor(new Color(34, 139, 34)); // Green
+            g.fillOval(x + 8, y + 6, cellSize - 16, cellSize - 12);
+            // Eyes on plant
+            g.setColor(Color.BLACK);
+            g.fillOval(x + 10, y + 12, 4, 4);
+            g.fillOval(x + cellSize - 14, y + 12, 4, 4);
+        } else {
+            // Enemigo básico (red square with eyes)
+            g.setColor(Color.RED);
+            g.fillRect(x + 4, y + 4, cellSize - 8, cellSize - 8);
+            g.setColor(Color.DARK_GRAY);
+            // Ojos
+            g.fillOval(x + 8, y + 10, 6, 6);
+            g.fillOval(x + cellSize - 14, y + 10, 6, 6);
+        }
     }
 
     private void renderFruit(Graphics2D g, Fruit fruit, int x, int y) {

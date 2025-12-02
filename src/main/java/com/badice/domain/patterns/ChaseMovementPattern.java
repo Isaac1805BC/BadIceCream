@@ -25,14 +25,33 @@ public class ChaseMovementPattern implements MovementPattern {
         int dx = playerPos.getX() - enemyPos.getX();
         int dy = playerPos.getY() - enemyPos.getY();
 
-        // Priorizar el eje con mayor distancia
+        // Determinar direcciones preferidas
+        Direction horizontalDir = (dx > 0) ? Direction.RIGHT : Direction.LEFT;
+        Direction verticalDir = (dy > 0) ? Direction.DOWN : Direction.UP;
+
+        // Intentar moverse en el eje con mayor distancia primero
         if (Math.abs(dx) > Math.abs(dy)) {
-            if (dx > 0) return Direction.RIGHT;
-            else return Direction.LEFT;
+            // Preferencia horizontal
+            if (canMove(enemy, horizontalDir, map)) {
+                return horizontalDir;
+            } else if (dy != 0 && canMove(enemy, verticalDir, map)) {
+                return verticalDir;
+            }
         } else {
-            if (dy > 0) return Direction.DOWN;
-            else return Direction.UP;
+            // Preferencia vertical
+            if (canMove(enemy, verticalDir, map)) {
+                return verticalDir;
+            } else if (dx != 0 && canMove(enemy, horizontalDir, map)) {
+                return horizontalDir;
+            }
         }
+
+        return Direction.NONE;
+    }
+
+    private boolean canMove(Enemy enemy, Direction dir, GameMap map) {
+        Position nextPos = enemy.getPosition().move(dir);
+        return map.isValidPosition(nextPos) && !map.isPositionBlocked(nextPos);
     }
 
     @Override

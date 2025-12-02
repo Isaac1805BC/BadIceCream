@@ -30,8 +30,24 @@ public class MovementService {
         }
 
         // Verificar colisiones
-        if (collisionDetector.willCollideWithSolid(targetPosition, map)) {
-            return false;
+        // Si es un enemigo, permitimos que se mueva a la posición del jugador para
+        // "matarlo"
+        if (entity instanceof com.badice.domain.entities.Enemy) {
+            boolean blockedByNonPlayer = map.getEntities().stream()
+                    .filter(e -> e.isActive() && e instanceof com.badice.domain.interfaces.Collidable)
+                    .map(e -> (com.badice.domain.interfaces.Collidable) e)
+                    .filter(com.badice.domain.interfaces.Collidable::isSolid)
+                    .filter(e -> !(e instanceof com.badice.domain.entities.Player)) // Ignorar al jugador
+                    .anyMatch(e -> e.getCollisionPosition().equals(targetPosition));
+
+            if (blockedByNonPlayer) {
+                return false;
+            }
+        } else {
+            // Comportamiento normal para otras entidades (incluido jugador)
+            if (collisionDetector.willCollideWithSolid(targetPosition, map)) {
+                return false;
+            }
         }
 
         // Ejecutar el movimiento

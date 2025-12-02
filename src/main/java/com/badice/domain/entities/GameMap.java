@@ -189,4 +189,27 @@ public class GameMap {
         }
         cleanupInactiveEntities();
     }
+
+    /**
+     * Encuentra una posición aleatoria libre en el mapa.
+     * Una posición está libre si está dentro de los límites y no está bloqueada.
+     */
+    public Position findRandomFreePosition() {
+        java.util.Random random = new java.util.Random();
+        int maxAttempts = 100; // Evitar bucle infinito
+
+        for (int i = 0; i < maxAttempts; i++) {
+            int x = random.nextInt(width);
+            int y = random.nextInt(height);
+            Position candidate = new Position(x, y);
+
+            if (isValidPosition(candidate) && !isPositionBlocked(candidate)) {
+                return candidate;
+            }
+        }
+
+        // Si no se encuentra una posición libre, retornar null
+        return null;
+    }
+
 }

@@ -76,23 +76,31 @@ public class GameEngine {
     /**
      * Actualiza todas las entidades del mapa.
      */
+    private int tickCounter = 0;
+
+    /**
+     * Actualiza todas las entidades del mapa.
+     */
     public void updateEntities() {
         if (currentMap == null || isPaused) {
             return;
         }
+
+        tickCounter++;
+        boolean shouldMoveEnemies = tickCounter % 3 == 0; // Mover enemigos cada 3 ticks (aprox 300ms)
 
         // Actualizar enemigos y su movimiento
         for (Enemy enemy : currentMap.getEnemies()) {
             if (!enemy.isActive())
                 continue;
 
-            MovementPattern pattern = enemy.getMovementPattern();
-            if (pattern != null) {
-                Direction nextDirection = pattern.calculateNextDirection(enemy, currentMap);
-                boolean moved = movementService.moveEntity(enemy, nextDirection, currentMap);
-                // Debug: Mostrar posición del enemigo
-                // System.out.println("Enemy at: " + enemy.getPosition().getX() + "," +
-                // enemy.getPosition().getY());
+            // Solo mover si toca este tick
+            if (shouldMoveEnemies) {
+                MovementPattern pattern = enemy.getMovementPattern();
+                if (pattern != null) {
+                    Direction nextDirection = pattern.calculateNextDirection(enemy, currentMap);
+                    boolean moved = movementService.moveEntity(enemy, nextDirection, currentMap);
+                }
             }
         }
 
@@ -103,10 +111,6 @@ public class GameEngine {
         List<Player> players = currentMap.getPlayers();
         for (Player player : players) {
             if (player != null && player.isActive()) {
-                // Debug: Mostrar posición del jugador
-                // System.out.println("Player at: " + player.getPosition().getX() + "," +
-                // player.getPosition().getY());
-
                 List<GameEntity> collisions = collisionDetector.detectPlayerCollisions(player, currentMap);
 
                 for (GameEntity entity : collisions) {
@@ -117,8 +121,6 @@ public class GameEngine {
                             scoreService.addFruitScore(fruit.getPoints());
                         }
                     } else if (entity instanceof Enemy) {
-                        System.out.println("¡COLISIÓN DETECTADA! Jugador en " + player.getPosition()
-                                + " tocó enemigo en " + entity.getPosition());
                         handlePlayerDeath(player);
                         break; // Solo morir una vez por frame
                     }
@@ -127,7 +129,9 @@ public class GameEngine {
         }
 
         // Verificar transición de fase
-        if (currentPhase < totalPhases && scoreService.areAllFruitsCollected()) {
+        if (currentPhase < totalPhases && scoreService.areAllFruitsCollected())
+
+        {
             spawnNextPhase();
         }
 
@@ -276,23 +280,52 @@ public class GameEngine {
 
             // Fase 1: Plátanos amarillos (100 puntos c/u)
             // Posiciones que NO coinciden con bloques
-            currentMap.addEntity(EntityFactory.createFruit(2, 2, "platano", 100));
-            currentMap.addEntity(EntityFactory.createFruit(12, 2, "platano", 100));
-            currentMap.addEntity(EntityFactory.createFruit(7, 3, "platano", 100));
+            currentMap.addEntity(EntityFactory.createBasicFruit(2, 2, "platano", 100));
+            currentMap.addEntity(EntityFactory.createBasicFruit(12, 2, "platano", 100));
+            currentMap.addEntity(EntityFactory.createBasicFruit(7, 3, "platano", 100));
 
             // Configurar score service - cuenta solo plátanos inicialmente
             scoreService.setTotalFruits(3);
+
+            // Añadir enemigos básicos
+            currentMap.addEntity(EntityFactory.createEnemy(13, 9, "horizontal", "basic"));
+            currentMap.addEntity(EntityFactory.createEnemy(1, 9, "vertical", "basic"));
+        } else if (levelNumber == 2) {
+            // Nivel 2: Cerezas (teleport) y Piñas (mirror movement)
+            currentPhase = 1;
+            totalPhases = 1;
+
+            // Obtener el jugador para las piñas
+            Player player = currentMap.getPlayer();
+
+            // Añadir cerezas (se teletransportan cada 20 segundos, 150 puntos c/u)
+            currentMap.addEntity(EntityFactory.createCherryFruit(2, 2, currentMap));
+            currentMap.addEntity(EntityFactory.createCherryFruit(12, 2, currentMap));
+            currentMap.addEntity(EntityFactory.createCherryFruit(7, 5, currentMap));
+
+            // Añadir piñas (se mueven cuando el jugador se mueve, 200 puntos c/u)
+            if (player != null) {
+                currentMap.addEntity(EntityFactory.createPineappleFruit(4, 4, player, currentMap));
+                currentMap.addEntity(EntityFactory.createPineappleFruit(10, 4, player, currentMap));
+            }
+
+            // Total: 3 cerezas + 2 piñas = 5 frutas
+            scoreService.setTotalFruits(5);
+
+            // Añadir enemigo maceta (persigue al jugador, no puede romper hielo)
+            currentMap.addEntity(EntityFactory.createPotEnemy(13, 9));
+            currentMap.addEntity(EntityFactory.createPotEnemy(1, 9));
         } else {
             // Otros niveles: comportamiento por defecto
             currentPhase = 1;
             totalPhases = 1;
-            currentMap.addEntity(EntityFactory.createFruit(7, 5, "apple", 100));
+            currentMap.addEntity(EntityFactory.createBasicFruit(7, 5, "apple", 100));
             scoreService.setTotalFruits(1);
-        }
 
-        // Añadir enemigos
-        currentMap.addEntity(EntityFactory.createEnemy(13, 9, "horizontal", "basic"));
-        currentMap.addEntity(EntityFactory.createEnemy(1, 9, "vertical", "basic"));
+            // Añadir enemigos
+            currentMap.addEntity(EntityFactory.createEnemy(13, 9, "horizontal", "basic"));
+            currentMap.addEntity(EntityFactory.createEnemy(1, 9, "vertical", "basic"));
+        }
 
         scoreService.setCurrentLevel(levelNumber);
 
@@ -308,11 +341,11 @@ public class GameEngine {
         if (currentLevelNumber == 1 && currentPhase == 2) {
             // Nivel 1, Fase 2: Spawner uvas moradas
             // Posiciones que NO coinciden con bloques
-            currentMap.addEntity(EntityFactory.createFruit(2, 7, "uva", 50));
-            currentMap.addEntity(EntityFactory.createFruit(12, 7, "uva", 50));
-            currentMap.addEntity(EntityFactory.createFruit(7, 7, "uva", 50));
-            currentMap.addEntity(EntityFactory.createFruit(4, 4, "uva", 50));
-            currentMap.addEntity(EntityFactory.createFruit(10, 4, "uva", 50));
+            currentMap.addEntity(EntityFactory.createBasicFruit(2, 7, "uva", 50));
+            currentMap.addEntity(EntityFactory.createBasicFruit(12, 7, "uva", 50));
+            currentMap.addEntity(EntityFactory.createBasicFruit(7, 7, "uva", 50));
+            currentMap.addEntity(EntityFactory.createBasicFruit(4, 4, "uva", 50));
+            currentMap.addEntity(EntityFactory.createBasicFruit(10, 4, "uva", 50));
 
             // Actualizar score service para contar uvas
             scoreService.nextPhase(5); // 5 uvas
@@ -349,6 +382,7 @@ public class GameEngine {
      * Carga el nivel actual por número.
      */
     public void loadCurrentLevel() {
+        tickCounter = 0; // Reset tick counter para asegurar que enemigos se muevan correctamente
         createLevel(currentLevelNumber);
     }
 
@@ -357,8 +391,8 @@ public class GameEngine {
      */
     public void nextLevel() {
         currentLevelNumber++;
-        // Solo hay 1 nivel hardcodeado, así que reinicia al nivel 1
-        if (currentLevelNumber > 1) {
+        // Ahora soportamos 2 niveles, reiniciar al nivel 1 después del nivel 2
+        if (currentLevelNumber > 2) {
             currentLevelNumber = 1;
         }
         scoreService.nextLevel();
@@ -376,9 +410,19 @@ public class GameEngine {
     /**
      * Inicia un nuevo juego.
      */
+    /**
+     * Inicia un nuevo juego.
+     */
     public void startNewGame(GameMode mode) {
+        startLevel(1, mode);
+    }
+
+    /**
+     * Inicia el juego en un nivel específico.
+     */
+    public void startLevel(int levelNumber, GameMode mode) {
         this.currentMode = mode;
-        currentLevelNumber = 1;
+        this.currentLevelNumber = levelNumber;
         scoreService.resetCurrentScore();
         loadCurrentLevel();
     }

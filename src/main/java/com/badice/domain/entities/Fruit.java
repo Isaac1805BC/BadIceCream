@@ -3,14 +3,15 @@ package com.badice.domain.entities;
 import com.badice.domain.interfaces.Collidable;
 
 /**
- * Representa una fruta coleccionable en el juego.
+ * Clase abstracta que representa una fruta coleccionable en el juego.
+ * Las subclases definen comportamientos específicos de cada tipo de fruta.
  */
-public class Fruit extends GameEntity implements Collidable {
+public abstract class Fruit extends GameEntity implements Collidable {
     private static final String ENTITY_TYPE = "FRUIT";
 
-    private String fruitType; // manzana, fresa, cereza, etc.
-    private int points;
-    private boolean collected;
+    protected String fruitType; // manzana, fresa, cereza, etc.
+    protected int points;
+    protected boolean collected;
 
     public Fruit(Position position, String fruitType, int points) {
         super(position);
@@ -60,12 +61,15 @@ public class Fruit extends GameEntity implements Collidable {
     }
 
     @Override
-    protected void doUpdate() {
-        // Las frutas son estáticas, no necesitan actualización
-    }
-
-    @Override
     public String getEntityType() {
         return ENTITY_TYPE;
     }
+
+    /**
+     * Método abstracto para definir el comportamiento específico de cada tipo de
+     * fruta.
+     * Las subclases deben implementar su lógica de actualización personalizada.
+     */
+    @Override
+    protected abstract void doUpdate();
 }

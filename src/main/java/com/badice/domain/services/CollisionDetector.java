@@ -36,6 +36,15 @@ public class CollisionDetector {
 
             if (entity instanceof Collidable) {
                 Collidable collidable = (Collidable) entity;
+                // Debug: Verificar distancia
+                if (entity instanceof Fruit) {
+                    // System.out.println("Verificando colisión con fruta en " +
+                    // entity.getPosition() + " Jugador en " + player.getPosition());
+                    if (entity.getPosition().equals(player.getPosition())) {
+                        System.out.println("¡COINCIDENCIA DE POSICIÓN con fruta! " + entity.getClass().getSimpleName());
+                    }
+                }
+
                 if (collidable.collidesWith(player)) {
                     collisions.add(entity);
                 }

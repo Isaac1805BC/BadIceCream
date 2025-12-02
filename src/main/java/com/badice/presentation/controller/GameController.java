@@ -67,6 +67,7 @@ public class GameController {
         // Timer para lógica del juego (10 FPS)
         gameLoopTimer = new Timer(GameConfig.GAME_TICK_RATE, e -> {
             gameEngine.update();
+            checkGameState();
         });
 
         // Timer para renderizado (60 FPS)
@@ -112,6 +113,7 @@ public class GameController {
      * Reintenta el nivel actual.
      */
     private void retryLevel() {
+        stopGameLoop(); // Detener timers existentes primero
         gameEngine.restartLevel();
         gameEngine.changeState(new PlayingState());
         showGamePanel();
@@ -145,13 +147,81 @@ public class GameController {
     }
 
     /**
-     * Muestra la selección de nivel (por implementar).
+     * Muestra la selección de nivel.
      */
     private void showLevelSelection() {
-        JOptionPane.showMessageDialog(mainFrame,
-                "Selección de nivel no implementada aún",
-                "Info",
-                JOptionPane.INFORMATION_MESSAGE);
+        String[] options = { "Nivel 1", "Nivel 2" };
+        int choice = JOptionPane.showOptionDialog(mainFrame,
+                "Selecciona el nivel:",
+                "Selección de Nivel",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]);
+
+        if (choice >= 0) {
+            // Seleccionar modo de juego primero
+            showGameModeSelectionForLevel(choice + 1);
+        }
+    }
+
+    private void showGameModeSelectionForLevel(int level) {
+        String[] options = { "1 Player", "Player vs Player", "Player vs Machine", "Machine vs Machine" };
+        int choice = JOptionPane.showOptionDialog(mainFrame,
+                "Selecciona el modo de juego:",
+                "Modo de Juego",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]);
+
+        if (choice >= 0) {
+            GameMode mode = switch (choice) {
+                case 0 -> GameMode.ONE_PLAYER;
+                case 1 -> GameMode.PVP;
+                case 2 -> GameMode.PVM;
+                case 3 -> GameMode.MVM;
+                default -> GameMode.ONE_PLAYER;
+            };
+            gameEngine.startLevel(level, mode);
+            gameEngine.changeState(new PlayingState());
+            showGamePanel();
+            startGameLoop();
+        }
+    }
+
+    private void checkGameState() {
+        if (gameEngine.getStateManager().isInState(com.badice.domain.states.LevelCompleteState.class)) {
+            stopGameLoop();
+            showLevelCompleteDialog();
+        } else if (gameEngine.getStateManager().isInState(com.badice.domain.states.GameOverState.class)) {
+            // Ya manejado por GameOverState pero aseguramos la UI
+            showGameOver();
+        }
+    }
+
+    private void showLevelCompleteDialog() {
+        Object[] options = { "Siguiente Nivel", "Menú Principal" };
+        int n = JOptionPane.showOptionDialog(mainFrame,
+                "¡Nivel Completado!\n¿Qué deseas hacer?",
+                "Nivel Completado",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]);
+
+        if (n == JOptionPane.YES_OPTION) {
+            // Siguiente Nivel
+            gameEngine.nextLevel();
+            gameEngine.changeState(new PlayingState());
+            startGameLoop();
+        } else {
+            // Menú Principal
+            showMenu();
+        }
     }
 
     /**
