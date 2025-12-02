@@ -89,7 +89,10 @@ public class GameEngine {
             MovementPattern pattern = enemy.getMovementPattern();
             if (pattern != null) {
                 Direction nextDirection = pattern.calculateNextDirection(enemy, currentMap);
-                movementService.moveEntity(enemy, nextDirection, currentMap);
+                boolean moved = movementService.moveEntity(enemy, nextDirection, currentMap);
+                // Debug: Mostrar posición del enemigo
+                // System.out.println("Enemy at: " + enemy.getPosition().getX() + "," +
+                // enemy.getPosition().getY());
             }
         }
 
@@ -100,6 +103,10 @@ public class GameEngine {
         List<Player> players = currentMap.getPlayers();
         for (Player player : players) {
             if (player != null && player.isActive()) {
+                // Debug: Mostrar posición del jugador
+                // System.out.println("Player at: " + player.getPosition().getX() + "," +
+                // player.getPosition().getY());
+
                 List<GameEntity> collisions = collisionDetector.detectPlayerCollisions(player, currentMap);
 
                 for (GameEntity entity : collisions) {
@@ -110,6 +117,8 @@ public class GameEngine {
                             scoreService.addFruitScore(fruit.getPoints());
                         }
                     } else if (entity instanceof Enemy) {
+                        System.out.println("¡COLISIÓN DETECTADA! Jugador en " + player.getPosition()
+                                + " tocó enemigo en " + entity.getPosition());
                         handlePlayerDeath(player);
                         break; // Solo morir una vez por frame
                     }
@@ -127,9 +136,13 @@ public class GameEngine {
     }
 
     private void handlePlayerDeath(Player player) {
+        System.out.println("¡JUGADOR MUERTO! Vidas antes: " + player.getLives());
+
         // Muerte instantánea - Game Over directo
-        // En multiplayer podríamos desactivar solo al jugador muerto
+        player.loseLife();
         player.setInactive();
+
+        System.out.println("Vidas después: " + player.getLives() + ", Activo: " + player.isActive());
 
         // Si todos los jugadores están muertos, game over
         boolean allDead = true;
@@ -141,6 +154,7 @@ public class GameEngine {
         }
 
         if (allDead) {
+            System.out.println("Todos los jugadores muertos. Cambiando a Game Over...");
             changeState(new GameOverState());
         }
     }

@@ -18,7 +18,7 @@ class PlayerTest {
     @Test
     void testPlayerInitialization() {
         assertEquals(new Position(5, 5), player.getPosition());
-        assertEquals(3, player.getLives());
+        assertEquals(1, player.getLives());
         assertEquals(0, player.getScore());
         assertTrue(player.isActive());
     }
@@ -35,11 +35,6 @@ class PlayerTest {
     @Test
     void testPlayerLoseLife() {
         player.loseLife();
-        assertEquals(2, player.getLives());
-        assertTrue(player.isActive());
-
-        player.loseLife();
-        player.loseLife();
         assertEquals(0, player.getLives());
         assertFalse(player.isActive());
     }
@@ -47,7 +42,7 @@ class PlayerTest {
     @Test
     void testPlayerAddLife() {
         player.addLife();
-        assertEquals(4, player.getLives());
+        assertEquals(2, player.getLives());
     }
 
     @Test

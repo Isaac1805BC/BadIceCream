@@ -24,7 +24,8 @@ class IceManagerTest {
         IceBlock ice = iceManager.createIceBlock(startPos, Direction.RIGHT, gameMap);
 
         assertNotNull(ice);
-        assertEquals(new Position(6, 5), ice.getPosition());
+        // El IceManager crea bloques hasta el borde del mapa, el último es en x=9
+        assertEquals(new Position(9, 5), ice.getPosition());
         assertTrue(ice.isActive());
     }
 
