@@ -51,28 +51,47 @@ public class ResourceManager {
     /**
      * Carga un sprite del jugador.
      */
-    public BufferedImage getPlayerSprite(String direction) {
-        return loadImage("sprites/player/player_" + direction + ".png");
+    public BufferedImage getPlayerSprite(String color, String direction) {
+        // Mapear "blue" al sprite "player" original
+        String colorPrefix = color.equals("blue") ? "player" : color;
+        return loadImage("sprites/player/" + colorPrefix + "_" + direction + ".png");
     }
 
     /**
      * Carga un sprite de enemigo.
      */
     public BufferedImage getEnemySprite(String enemyType, String direction) {
-        return loadImage("sprites/enemies/" + enemyType + "_" + direction + ".png");
+        if (enemyType.equalsIgnoreCase("squid")) {
+            return loadImage("sprites/enemies/calamar.png");
+        }
+        return loadImage("sprites/enemies/" + enemyType + ".png");
     }
 
     /**
      * Carga un sprite de fruta.
      */
     public BufferedImage getFruitSprite(String fruitType) {
-        return loadImage("sprites/fruits/" + fruitType + ".png");
+        // Mapear nombres comunes a los nombres de archivo exactos
+        String filename = switch (fruitType.toLowerCase()) {
+            case "banana", "platano" -> "Banana.png";
+            case "uva", "grape" -> "Grape.png";
+            case "cereza", "cherry" -> "Cherry.png";
+            case "pina", "piña", "pineapple" -> "Pineapple.png";
+            case "cactus" -> "Cactus.png";
+            default -> fruitType + ".png"; // Fallback
+        };
+        
+        return loadImage("sprites/fruits/" + filename);
     }
 
     /**
      * Carga un sprite de bloque.
      */
     public BufferedImage getBlockSprite(String blockType) {
+        if (blockType.equals("wall")) {
+            // Usar el sprite de hielo para las paredes del borde como solicitó el usuario
+            return loadImage("sprites/fruits/iceBlock.png");
+        }
         return loadImage("sprites/blocks/" + blockType + ".png");
     }
 

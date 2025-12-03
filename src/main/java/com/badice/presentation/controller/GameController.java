@@ -18,6 +18,16 @@ public class GameController {
     private final GamePanel gamePanel;
     private final MenuPanel menuPanel;
     private final GameOverPanel gameOverPanel;
+    private final GameModeSelectionPanel gameModeSelectionPanel;
+    private final LevelSelectionPanel levelSelectionPanel;
+    private final PlayerColorSelectionPanel playerColorSelectionPanel;
+    private final VictoryPanel victoryPanel;
+    
+    // Variables para el flujo de selección de color
+    private GameMode selectedGameMode;
+    private String player1Color;
+    private String player2Color;
+    private int selectedLevel = 1;
 
     private final InputHandler inputHandler;
     private final ActionMapper actionMapper;
@@ -34,6 +44,10 @@ public class GameController {
         this.gamePanel = new GamePanel(gameEngine);
         this.menuPanel = new MenuPanel();
         this.gameOverPanel = new GameOverPanel();
+        this.gameModeSelectionPanel = new GameModeSelectionPanel();
+        this.levelSelectionPanel = new LevelSelectionPanel();
+        this.playerColorSelectionPanel = new PlayerColorSelectionPanel();
+        this.victoryPanel = new VictoryPanel();
         this.mainFrame = new MainFrame();
 
         setupEventHandlers();
@@ -51,6 +65,34 @@ public class GameController {
         menuPanel.setPlayButtonListener(e -> showGameModeSelection());
         menuPanel.setSelectLevelButtonListener(e -> showLevelSelection());
         menuPanel.setExitButtonListener(e -> System.exit(0));
+
+        // Game mode selection panel listeners
+        gameModeSelectionPanel.setOnePlayerButtonListener(e -> handleGameModeSelection(GameMode.ONE_PLAYER));
+        gameModeSelectionPanel.setPvpButtonListener(e -> handleGameModeSelection(GameMode.PVP));
+        gameModeSelectionPanel.setPvmButtonListener(e -> handleGameModeSelection(GameMode.PVM));
+        gameModeSelectionPanel.setMvmButtonListener(e -> handleGameModeSelection(GameMode.MVM));
+        gameModeSelectionPanel.setBackButtonListener(e -> showMenu());
+
+        // Level selection panel listeners
+        levelSelectionPanel.setLevel1ButtonListener(e -> showGameModeSelectionForLevel(1));
+        levelSelectionPanel.setLevel2ButtonListener(e -> showGameModeSelectionForLevel(2));
+        levelSelectionPanel.setLevel3ButtonListener(e -> showGameModeSelectionForLevel(3));
+        levelSelectionPanel.setBackButtonListener(e -> showMenu());
+
+        // Player color selection panel listeners
+        playerColorSelectionPanel.setRedButtonListener(e -> handleColorSelection("red"));
+        playerColorSelectionPanel.setBrownButtonListener(e -> handleColorSelection("brown"));
+        playerColorSelectionPanel.setBlueButtonListener(e -> handleColorSelection("blue"));
+        playerColorSelectionPanel.setBackButtonListener(e -> showGameModeSelection());
+
+        // Victory panel listeners
+        victoryPanel.setNextLevelButtonListener(e -> {
+            gameEngine.nextLevel();
+            gameEngine.changeState(new PlayingState());
+            showGamePanel();
+            startGameLoop();
+        });
+        victoryPanel.setMainMenuButtonListener(e -> showMenu());
 
         // Game over panel listeners
         gameOverPanel.setRetryButtonListener(e -> retryLevel());
@@ -86,27 +128,65 @@ public class GameController {
         startGameLoop();
     }
 
-    private void showGameModeSelection() {
-        String[] options = { "1 Player", "Player vs Player", "Player vs Machine", "Machine vs Machine" };
-        int choice = JOptionPane.showOptionDialog(mainFrame,
-                "Selecciona el modo de juego:",
-                "Modo de Juego",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                options,
-                options[0]);
-
-        if (choice >= 0) {
-            GameMode mode = switch (choice) {
-                case 0 -> GameMode.ONE_PLAYER;
-                case 1 -> GameMode.PVP;
-                case 2 -> GameMode.PVM;
-                case 3 -> GameMode.MVM;
-                default -> GameMode.ONE_PLAYER;
-            };
-            startNewGame(mode);
+    /**
+     * Maneja la selecci\u00f3n de modo de juego.
+     */
+    private void handleGameModeSelection(GameMode mode) {
+        selectedGameMode = mode;
+        
+        // MvM: Colores fijos (rojo y caf\u00e9), iniciar directamente
+        if (mode == GameMode.MVM) {
+            player1Color = "red";
+            player2Color = "brown";
+            startNewGameWithColors();
         }
+        // 1 Player, PvP o PvM: Mostrar selecci\u00f3n de color para el jugador 1 (o \u00fanico jugador)
+        else {
+            player1Color = null; // Reiniciar colores para nueva selecci\u00f3n
+            player2Color = null;
+            playerColorSelectionPanel.setPlayerNumber("1");
+            playerColorSelectionPanel.setDisabledColor(null); // No hay colores deshabilitados al inicio
+            mainFrame.showPanel(playerColorSelectionPanel);
+        }
+    }
+
+    /**
+     * Maneja la selecci\u00f3n de color del jugador.
+     */
+    private void handleColorSelection(String color) {
+        if (selectedGameMode == GameMode.ONE_PLAYER) {
+            player1Color = color;
+            startNewGameWithColors();
+        }
+        // Para PvP y PvM, se selecciona el color del jugador 1 y luego el del jugador 2
+        else if (selectedGameMode == GameMode.PVP || selectedGameMode == GameMode.PVM) {
+            if (player1Color == null) {
+                // El primer jugador seleccion\u00f3 su color
+                player1Color = color;
+                // Preparar la selecci\u00f3n para el segundo jugador
+                playerColorSelectionPanel.setPlayerNumber("2");
+                playerColorSelectionPanel.setDisabledColor(color); // Deshabilitar el color ya elegido
+                mainFrame.showPanel(playerColorSelectionPanel);
+            } else {
+                // El segundo jugador (o la IA en PvM) seleccion\u00f3 su color
+                player2Color = color;
+                startNewGameWithColors();
+            }
+        }
+    }
+
+    /**
+     * Inicia el juego con los colores seleccionados.
+     */
+    private void startNewGameWithColors() {
+        gameEngine.startNewGameWithColors(selectedGameMode, player1Color, player2Color);
+        gameEngine.changeState(new PlayingState());
+        showGamePanel();
+        startGameLoop();
+    }
+
+    private void showGameModeSelection() {
+        mainFrame.showPanel(gameModeSelectionPanel);
     }
 
     /**
@@ -114,7 +194,25 @@ public class GameController {
      */
     private void retryLevel() {
         stopGameLoop(); // Detener timers existentes primero
+        
+        // Guardar colores actuales de los jugadores
+        java.util.List<String> playerColors = new java.util.ArrayList<>();
+        if (gameEngine.getCurrentMap() != null) {
+            for (com.badice.domain.entities.Player p : gameEngine.getCurrentMap().getPlayers()) {
+                playerColors.add(p.getPlayerColor());
+            }
+        }
+        
         gameEngine.restartLevel();
+        
+        // Restaurar colores
+        if (gameEngine.getCurrentMap() != null && !playerColors.isEmpty()) {
+            java.util.List<com.badice.domain.entities.Player> players = gameEngine.getCurrentMap().getPlayers();
+            for (int i = 0; i < Math.min(players.size(), playerColors.size()); i++) {
+                players.get(i).setPlayerColor(playerColors.get(i));
+            }
+        }
+        
         gameEngine.changeState(new PlayingState());
         showGamePanel();
         startGameLoop();
@@ -126,6 +224,9 @@ public class GameController {
     public void showMenu() {
         stopGameLoop();
         gameEngine.changeState(new MenuState());
+        // Reiniciar colores al volver al menú
+        player1Color = null;
+        player2Color = null;
         mainFrame.showPanel(menuPanel);
     }
 
@@ -150,56 +251,74 @@ public class GameController {
      * Muestra la selección de nivel.
      */
     private void showLevelSelection() {
-        String[] options = { "Nivel 1", "Nivel 2" };
-        int choice = JOptionPane.showOptionDialog(mainFrame,
-                "Selecciona el nivel:",
-                "Selección de Nivel",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                options,
-                options[0]);
-
-        if (choice >= 0) {
-            // Seleccionar modo de juego primero
-            showGameModeSelectionForLevel(choice + 1);
-        }
+        mainFrame.showPanel(levelSelectionPanel);
     }
 
     private void showGameModeSelectionForLevel(int level) {
-        String[] options = { "1 Player", "Player vs Player", "Player vs Machine", "Machine vs Machine" };
-        int choice = JOptionPane.showOptionDialog(mainFrame,
-                "Selecciona el modo de juego:",
-                "Modo de Juego",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                options,
-                options[0]);
-
-        if (choice >= 0) {
-            GameMode mode = switch (choice) {
-                case 0 -> GameMode.ONE_PLAYER;
-                case 1 -> GameMode.PVP;
-                case 2 -> GameMode.PVM;
-                case 3 -> GameMode.MVM;
-                default -> GameMode.ONE_PLAYER;
-            };
-            gameEngine.startLevel(level, mode);
+        // Guardar el nivel seleccionado temporalmente
+        final int selectedLevel = level;
+        
+        // Crear un panel temporal de selección de modo para este nivel
+        GameModeSelectionPanel tempModePanel = new GameModeSelectionPanel();
+        tempModePanel.setOnePlayerButtonListener(e -> {
+            gameEngine.startLevel(selectedLevel, GameMode.ONE_PLAYER);
             gameEngine.changeState(new PlayingState());
             showGamePanel();
             startGameLoop();
-        }
+        });
+        tempModePanel.setPvpButtonListener(e -> {
+            gameEngine.startLevel(selectedLevel, GameMode.PVP);
+            gameEngine.changeState(new PlayingState());
+            showGamePanel();
+            startGameLoop();
+        });
+        tempModePanel.setPvmButtonListener(e -> {
+            gameEngine.startLevel(selectedLevel, GameMode.PVM);
+            gameEngine.changeState(new PlayingState());
+            showGamePanel();
+            startGameLoop();
+        });
+        tempModePanel.setMvmButtonListener(e -> {
+            gameEngine.startLevel(selectedLevel, GameMode.MVM);
+            gameEngine.changeState(new PlayingState());
+            showGamePanel();
+            startGameLoop();
+        });
+        tempModePanel.setBackButtonListener(e -> showLevelSelection());
+        
+        mainFrame.showPanel(tempModePanel);
     }
 
     private void checkGameState() {
         if (gameEngine.getStateManager().isInState(com.badice.domain.states.LevelCompleteState.class)) {
             stopGameLoop();
-            showLevelCompleteDialog();
+            
+            // En modos multijugador, mostrar pantalla de victoria
+            if (gameEngine.getCurrentMode() == com.badice.domain.enums.GameMode.PVP || 
+                gameEngine.getCurrentMode() == com.badice.domain.enums.GameMode.PVM ||
+                gameEngine.getCurrentMode() == com.badice.domain.enums.GameMode.MVM) {
+                showVictoryScreen();
+            } else {
+                // Modo 1 jugador: Mostrar diálogo normal
+                showLevelCompleteDialog();
+            }
         } else if (gameEngine.getStateManager().isInState(com.badice.domain.states.GameOverState.class)) {
-            // Ya manejado por GameOverState pero aseguramos la UI
             showGameOver();
         }
+    }
+
+    private void showVictoryScreen() {
+        // Determinar ganador por puntos
+        java.util.List<com.badice.domain.entities.Player> players = gameEngine.getCurrentMap().getPlayers();
+        if (players.size() >= 2) {
+            com.badice.domain.entities.Player winner = players.get(0).getScore() > players.get(1).getScore() 
+                ? players.get(0) 
+                : players.get(1);
+            victoryPanel.setWinner(winner.getPlayerColor(), winner.getScore());
+        } else if (!players.isEmpty()) {
+            victoryPanel.setWinner(players.get(0).getPlayerColor(), players.get(0).getScore());
+        }
+        mainFrame.showPanel(victoryPanel);
     }
 
     private void showLevelCompleteDialog() {

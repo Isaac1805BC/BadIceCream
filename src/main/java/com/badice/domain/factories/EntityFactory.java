@@ -75,6 +75,13 @@ public class EntityFactory {
     }
 
     /**
+     * Crea una fruta cactus (alterna estado seguro/peligroso).
+     */
+    public static CactusFruit createCactusFruit(int x, int y) {
+        return new CactusFruit(new Position(x, y));
+    }
+
+    /**
      * Crea un bloque sólido.
      */
     public static Block createBlock(int x, int y, String blockType) {
@@ -100,6 +107,14 @@ public class EntityFactory {
      */
     public static PotEnemy createPotEnemy(int x, int y) {
         return new PotEnemy(new Position(x, y));
+    }
+
+    /**
+     * Crea un enemigo calamar (persigue y rompe hielo).
+     */
+    public static SquidEnemy createSquidEnemy(int x, int y, GameMap map) {
+        // Usa ChaseMovementPattern por defecto
+        return new SquidEnemy(new Position(x, y), new ChaseMovementPattern());
     }
 
     /**

@@ -1,8 +1,11 @@
 package com.badice.domain.services;
 
 import com.badice.domain.entities.Direction;
+import com.badice.domain.entities.Enemy;
 import com.badice.domain.entities.GameMap;
+import com.badice.domain.entities.Player;
 import com.badice.domain.entities.Position;
+import com.badice.domain.interfaces.Collidable;
 import com.badice.domain.interfaces.Movable;
 
 /**
@@ -32,12 +35,12 @@ public class MovementService {
         // Verificar colisiones
         // Si es un enemigo, permitimos que se mueva a la posición del jugador para
         // "matarlo"
-        if (entity instanceof com.badice.domain.entities.Enemy) {
+        if (entity instanceof Enemy) {
             boolean blockedByNonPlayer = map.getEntities().stream()
-                    .filter(e -> e.isActive() && e instanceof com.badice.domain.interfaces.Collidable)
-                    .map(e -> (com.badice.domain.interfaces.Collidable) e)
-                    .filter(com.badice.domain.interfaces.Collidable::isSolid)
-                    .filter(e -> !(e instanceof com.badice.domain.entities.Player)) // Ignorar al jugador
+                    .filter(e -> e.isActive() && e instanceof Collidable)
+                    .map(e -> (Collidable) e)
+                    .filter(Collidable::isSolid)
+                    .filter(e -> !(e instanceof Player)) // Ignorar al jugador
                     .anyMatch(e -> e.getCollisionPosition().equals(targetPosition));
 
             if (blockedByNonPlayer) {
@@ -46,7 +49,22 @@ public class MovementService {
         } else {
             // Comportamiento normal para otras entidades (incluido jugador)
             if (collisionDetector.willCollideWithSolid(targetPosition, map)) {
-                return false;
+                // Si la entidad es el jugador, verificar si lo que bloquea es un enemigo
+                if (entity instanceof Player) {
+                    boolean blockedByNonEnemy = map.getEntities().stream()
+                            .filter(e -> e.isActive() && e instanceof Collidable)
+                            .map(e -> (Collidable) e)
+                            .filter(Collidable::isSolid)
+                            .filter(e -> !(e instanceof Enemy)) // Ignorar enemigos (permitir colisión para morir)
+                            .anyMatch(e -> e.getCollisionPosition().equals(targetPosition));
+                    
+                    if (blockedByNonEnemy) {
+                        return false;
+                    }
+                    // Si solo bloquea un enemigo, permitimos el movimiento para que ocurra la colisión
+                } else {
+                    return false;
+                }
             }
         }
 

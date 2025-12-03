@@ -41,7 +41,6 @@ public class CollisionDetector {
                     // System.out.println("Verificando colisión con fruta en " +
                     // entity.getPosition() + " Jugador en " + player.getPosition());
                     if (entity.getPosition().equals(player.getPosition())) {
-                        System.out.println("¡COINCIDENCIA DE POSICIÓN con fruta! " + entity.getClass().getSimpleName());
                     }
                 }
 
@@ -74,7 +73,9 @@ public class CollisionDetector {
                 Fruit fruit = (Fruit) entity;
                 if (!fruit.isCollected()) {
                     fruit.collect();
-                    scoreService.addFruitScore(fruit.getPoints());
+                    int points = fruit.getPoints();
+                    scoreService.addFruitScore(points);
+                    player.addScore(points); // Añadir puntos al jugador individual
                 }
             } else if (entity instanceof Enemy) {
                 handlePlayerEnemyCollision(player, (Enemy) entity);

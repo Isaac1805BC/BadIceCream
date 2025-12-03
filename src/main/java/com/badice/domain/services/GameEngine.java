@@ -99,7 +99,37 @@ public class GameEngine {
                 MovementPattern pattern = enemy.getMovementPattern();
                 if (pattern != null) {
                     Direction nextDirection = pattern.calculateNextDirection(enemy, currentMap);
-                    boolean moved = movementService.moveEntity(enemy, nextDirection, currentMap);
+                    
+                    boolean moved = false;
+                    
+                    // Lógica especial para el Calamar (SquidEnemy)
+                    if (enemy instanceof SquidEnemy) {
+                        Position nextPos = enemy.getPosition().move(nextDirection);
+                        // Verificar si hay hielo en la siguiente posición
+                        if (iceManager.hasIceBlockAt(nextPos, currentMap)) {
+                            // Romper SOLO el bloque de hielo en nextPos (no toda la línea)
+                            IceBlock iceBlock = iceManager.getIceBlockAt(nextPos, currentMap);
+                            if (iceBlock != null) {
+                                iceBlock.destroy();
+                                currentMap.removeEntity(iceBlock);
+                                System.out.println("Squid broke ice at " + nextPos);
+                            }
+                            moved = true; // Consideramos que "actuó"
+                        } else {
+                            // Mover normal
+                            moved = movementService.moveEntity(enemy, nextDirection, currentMap);
+                        }
+                    } else {
+                        // Enemigos normales
+                        moved = movementService.moveEntity(enemy, nextDirection, currentMap);
+                    }
+                }
+            }
+            
+            // Verificar colisión directa con jugadores
+            for (Player player : currentMap.getPlayers()) {
+                if (player.isActive() && enemy.getPosition().equals(player.getPosition())) {
+                    handlePlayerDeath(player);
                 }
             }
         }
@@ -116,6 +146,13 @@ public class GameEngine {
                 for (GameEntity entity : collisions) {
                     if (entity instanceof Fruit) {
                         Fruit fruit = (Fruit) entity;
+                        
+                        // Verificar si es un cactus peligroso
+                        if (fruit instanceof CactusFruit && ((CactusFruit) fruit).isDangerous()) {
+                            handlePlayerDeath(player);
+                            break;
+                        }
+
                         if (!fruit.isCollected()) {
                             fruit.collect();
                             scoreService.addFruitScore(fruit.getPoints());
@@ -241,15 +278,14 @@ public class GameEngine {
         currentMap = EntityFactory.createDefaultMap();
 
         // Crear jugadores según el modo
-        if (currentMode == GameMode.ONE_PLAYER || currentMode == GameMode.PVM) {
+        if (currentMode == GameMode.ONE_PLAYER) {
             Player p1 = EntityFactory.createPlayer(1, 1);
             currentMap.addPlayer(p1);
-        } else if (currentMode == GameMode.PVP || currentMode == GameMode.MVM) {
+        } else if (currentMode == GameMode.PVP || currentMode == GameMode.MVM || currentMode == GameMode.PVM) {
             Player p1 = EntityFactory.createPlayer(1, 1);
             currentMap.addPlayer(p1);
 
             Player p2 = EntityFactory.createPlayer(13, 1); // P2 en la esquina opuesta
-            // TODO: Asignar color diferente a P2 si es posible
             currentMap.addPlayer(p2);
         }
 
@@ -315,6 +351,31 @@ public class GameEngine {
             // Añadir enemigo maceta (persigue al jugador, no puede romper hielo)
             currentMap.addEntity(EntityFactory.createPotEnemy(13, 9));
             currentMap.addEntity(EntityFactory.createPotEnemy(1, 9));
+        } else if (levelNumber == 3) {
+            // Nivel 3: Cactus (peligrosos) y Piñas
+            currentPhase = 1;
+            totalPhases = 1;
+
+            Player player = currentMap.getPlayer();
+
+            // Añadir Cactus (250 puntos c/u)
+            currentMap.addEntity(EntityFactory.createCactusFruit(3, 4));
+            currentMap.addEntity(EntityFactory.createCactusFruit(11, 4));
+            currentMap.addEntity(EntityFactory.createCactusFruit(7, 5));
+
+            // Añadir Piñas (200 puntos c/u)
+            if (player != null) {
+                currentMap.addEntity(EntityFactory.createPineappleFruit(2, 8, player, currentMap));
+                currentMap.addEntity(EntityFactory.createPineappleFruit(12, 8, player, currentMap));
+            }
+
+            // Total: 3 cactus + 2 piñas = 5 frutas
+            scoreService.setTotalFruits(5);
+
+            // Añadir enemigos (mezcla)
+            currentMap.addEntity(EntityFactory.createPotEnemy(13, 9));
+            // Reemplazar enemigo básico con Calamar
+            currentMap.addEntity(EntityFactory.createSquidEnemy(1, 9, currentMap));
         } else {
             // Otros niveles: comportamiento por defecto
             currentPhase = 1;
@@ -391,8 +452,8 @@ public class GameEngine {
      */
     public void nextLevel() {
         currentLevelNumber++;
-        // Ahora soportamos 2 niveles, reiniciar al nivel 1 después del nivel 2
-        if (currentLevelNumber > 2) {
+        // Ahora soportamos 3 niveles, reiniciar al nivel 1 después del nivel 3
+        if (currentLevelNumber > 3) {
             currentLevelNumber = 1;
         }
         scoreService.nextLevel();
@@ -428,6 +489,34 @@ public class GameEngine {
     }
 
     /**
+     * Inicia un nuevo juego con colores de jugador especificados.
+     */
+    public void startNewGameWithColors(GameMode mode, String player1Color, String player2Color) {
+        this.currentMode = mode;
+        this.currentLevelNumber = 1;
+        scoreService.resetCurrentScore();
+        createLevelWithColors(currentLevelNumber, player1Color, player2Color);
+        resetGameTimer();
+    }
+
+    /**
+     * Crea un nivel con colores de jugador personalizados.
+     */
+    private void createLevelWithColors(int levelNumber, String player1Color, String player2Color) {
+        // Crear el nivel normalmente
+        createLevel(levelNumber);
+        
+        // Actualizar colores de los jugadores
+        List<com.badice.domain.entities.Player> players = currentMap.getPlayers();
+        if (!players.isEmpty() && player1Color != null) {
+            players.get(0).setPlayerColor(player1Color);
+        }
+        if (players.size() > 1 && player2Color != null) {
+            players.get(1).setPlayerColor(player2Color);
+        }
+    }
+
+    /**
      * Cambia el estado del juego.
      */
     public void changeState(GameState newState) {
@@ -438,6 +527,7 @@ public class GameEngine {
     public void resetGameTimer() {
         this.gameStartTime = System.currentTimeMillis();
         this.pausedTime = 0;
+        this.isPaused = false;
     }
 
     public void pauseGameTimer() {
@@ -485,6 +575,10 @@ public class GameEngine {
 
     public int getCurrentLevelNumber() {
         return currentLevelNumber;
+    }
+
+    public GameMode getCurrentMode() {
+        return currentMode;
     }
 
     public MovementService getMovementService() {
