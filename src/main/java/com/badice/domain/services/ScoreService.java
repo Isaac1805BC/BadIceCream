@@ -120,4 +120,8 @@ public class ScoreService {
     public void setCurrentLevel(int level) {
         this.currentLevel = level;
     }
+
+    public void setFruitsCollected(int count) {
+        this.fruitsCollected = count;
+    }
 }

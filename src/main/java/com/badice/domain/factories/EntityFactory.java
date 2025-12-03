@@ -103,10 +103,10 @@ public class EntityFactory {
     }
 
     /**
-     * Crea un enemigo maceta (persigue al jugador, no puede romper hielo).
+     * Crea el enemigo Troll - Enemigo del nivel 1.
      */
-    public static PotEnemy createPotEnemy(int x, int y) {
-        return new PotEnemy(new Position(x, y));
+    public static Enemy createTrollEnemy(int x, int y) {
+        return new TrollEnemy(new Position(x, y), new HorizontalMovementPattern());
     }
 
     /**

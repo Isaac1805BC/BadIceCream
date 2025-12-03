@@ -22,7 +22,7 @@ public class GameController {
     private final LevelSelectionPanel levelSelectionPanel;
     private final PlayerColorSelectionPanel playerColorSelectionPanel;
     private final VictoryPanel victoryPanel;
-    
+
     // Variables para el flujo de selección de color
     private GameMode selectedGameMode;
     private String player1Color;
@@ -133,14 +133,15 @@ public class GameController {
      */
     private void handleGameModeSelection(GameMode mode) {
         selectedGameMode = mode;
-        
+
         // MvM: Colores fijos (rojo y caf\u00e9), iniciar directamente
         if (mode == GameMode.MVM) {
             player1Color = "red";
             player2Color = "brown";
             startNewGameWithColors();
         }
-        // 1 Player, PvP o PvM: Mostrar selecci\u00f3n de color para el jugador 1 (o \u00fanico jugador)
+        // 1 Player, PvP o PvM: Mostrar selecci\u00f3n de color para el jugador 1 (o
+        // \u00fanico jugador)
         else {
             player1Color = null; // Reiniciar colores para nueva selecci\u00f3n
             player2Color = null;
@@ -194,7 +195,7 @@ public class GameController {
      */
     private void retryLevel() {
         stopGameLoop(); // Detener timers existentes primero
-        
+
         // Guardar colores actuales de los jugadores
         java.util.List<String> playerColors = new java.util.ArrayList<>();
         if (gameEngine.getCurrentMap() != null) {
@@ -202,9 +203,9 @@ public class GameController {
                 playerColors.add(p.getPlayerColor());
             }
         }
-        
+
         gameEngine.restartLevel();
-        
+
         // Restaurar colores
         if (gameEngine.getCurrentMap() != null && !playerColors.isEmpty()) {
             java.util.List<com.badice.domain.entities.Player> players = gameEngine.getCurrentMap().getPlayers();
@@ -212,7 +213,7 @@ public class GameController {
                 players.get(i).setPlayerColor(playerColors.get(i));
             }
         }
-        
+
         gameEngine.changeState(new PlayingState());
         showGamePanel();
         startGameLoop();
@@ -257,7 +258,7 @@ public class GameController {
     private void showGameModeSelectionForLevel(int level) {
         // Guardar el nivel seleccionado temporalmente
         final int selectedLevel = level;
-        
+
         // Crear un panel temporal de selección de modo para este nivel
         GameModeSelectionPanel tempModePanel = new GameModeSelectionPanel();
         tempModePanel.setOnePlayerButtonListener(e -> {
@@ -285,23 +286,14 @@ public class GameController {
             startGameLoop();
         });
         tempModePanel.setBackButtonListener(e -> showLevelSelection());
-        
+
         mainFrame.showPanel(tempModePanel);
     }
 
     private void checkGameState() {
         if (gameEngine.getStateManager().isInState(com.badice.domain.states.LevelCompleteState.class)) {
             stopGameLoop();
-            
-            // En modos multijugador, mostrar pantalla de victoria
-            if (gameEngine.getCurrentMode() == com.badice.domain.enums.GameMode.PVP || 
-                gameEngine.getCurrentMode() == com.badice.domain.enums.GameMode.PVM ||
-                gameEngine.getCurrentMode() == com.badice.domain.enums.GameMode.MVM) {
-                showVictoryScreen();
-            } else {
-                // Modo 1 jugador: Mostrar diálogo normal
-                showLevelCompleteDialog();
-            }
+            showVictoryScreen();
         } else if (gameEngine.getStateManager().isInState(com.badice.domain.states.GameOverState.class)) {
             showGameOver();
         }
@@ -310,13 +302,27 @@ public class GameController {
     private void showVictoryScreen() {
         // Determinar ganador por puntos
         java.util.List<com.badice.domain.entities.Player> players = gameEngine.getCurrentMap().getPlayers();
-        if (players.size() >= 2) {
-            com.badice.domain.entities.Player winner = players.get(0).getScore() > players.get(1).getScore() 
-                ? players.get(0) 
-                : players.get(1);
-            victoryPanel.setWinner(winner.getPlayerColor(), winner.getScore());
-        } else if (!players.isEmpty()) {
-            victoryPanel.setWinner(players.get(0).getPlayerColor(), players.get(0).getScore());
+
+        // Obtener el score actual del servicio de puntuación
+        int currentScore = gameEngine.getScoreService().getCurrentScore();
+
+        if (gameEngine.getCurrentMode() == com.badice.domain.enums.GameMode.ONE_PLAYER) {
+            // Modo un jugador: mostrar el jugador con su puntuación del ScoreService
+            if (!players.isEmpty()) {
+                victoryPanel.setWinner(players.get(0).getPlayerColor(), currentScore);
+                victoryPanel.setSinglePlayerMode(true);
+            }
+        } else {
+            // Modos multijugador: determinar ganador
+            victoryPanel.setSinglePlayerMode(false);
+            if (players.size() >= 2) {
+                com.badice.domain.entities.Player winner = players.get(0).getScore() > players.get(1).getScore()
+                        ? players.get(0)
+                        : players.get(1);
+                victoryPanel.setWinner(winner.getPlayerColor(), currentScore);
+            } else if (!players.isEmpty()) {
+                victoryPanel.setWinner(players.get(0).getPlayerColor(), currentScore);
+            }
         }
         mainFrame.showPanel(victoryPanel);
     }

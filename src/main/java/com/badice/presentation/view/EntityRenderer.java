@@ -61,23 +61,20 @@ public class EntityRenderer {
     }
 
     private void renderEnemy(Graphics2D g, Enemy enemy, int x, int y) {
-        if (enemy instanceof PotEnemy) {
-            // Maceta (pot): brown pot with green plant
-            // Pot
-            BufferedImage sprite = resourceManager.getEnemySprite("maseta", null);
+        if (enemy instanceof TrollEnemy) {
+            // Troll: Enemy del nivel 1
+            BufferedImage sprite = resourceManager.getEnemySprite("troll", null);
 
             if (sprite != null) {
                 g.drawImage(sprite, x, y, cellSize, cellSize, null);
             } else {
-                g.setColor(new Color(139, 69, 19)); // Brown
-                g.fillRect(x + 6, y + cellSize - 12, cellSize - 12, 10);
-                // Plant
-                g.setColor(new Color(34, 139, 34)); // Green
-                g.fillOval(x + 8, y + 6, cellSize - 16, cellSize - 12);
-                // Eyes on plant
-                g.setColor(Color.BLACK);
-                g.fillOval(x + 10, y + 12, 4, 4);
-                g.fillOval(x + cellSize - 14, y + 12, 4, 4);
+                // Fallback: Red square with eyes
+                g.setColor(Color.RED);
+                g.fillRect(x + 4, y + 4, cellSize - 8, cellSize - 8);
+                g.setColor(Color.DARK_GRAY);
+                // Eyes
+                g.fillOval(x + 8, y + 10, 6, 6);
+                g.fillOval(x + cellSize - 14, y + 10, 6, 6);
             }
         } else if (enemy instanceof SquidEnemy) {
             // Calamar
@@ -91,7 +88,7 @@ public class EntityRenderer {
             }
         } else {
             BufferedImage sprite = resourceManager.getEnemySprite("troll", null);
-            // Enemigo básico (red square with eyes)
+            // Enemigo básico (fallback)
             if (sprite != null) {
                 g.drawImage(sprite, x, y, cellSize, cellSize, null);
             } else {
@@ -111,7 +108,7 @@ public class EntityRenderer {
         }
 
         BufferedImage sprite = resourceManager.getFruitSprite(fruit.getFruitType());
-        
+
         if (sprite != null) {
             g.drawImage(sprite, x, y, cellSize, cellSize, null);
         } else {
@@ -175,7 +172,7 @@ public class EntityRenderer {
 
     private void renderBlock(Graphics2D g, Block block, int x, int y) {
         BufferedImage sprite = resourceManager.getBlockSprite(block.getBlockType());
-        
+
         if (sprite != null) {
             g.drawImage(sprite, x, y, cellSize, cellSize, null);
         } else {

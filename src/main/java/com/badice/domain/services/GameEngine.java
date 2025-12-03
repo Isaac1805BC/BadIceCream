@@ -99,33 +99,32 @@ public class GameEngine {
                 MovementPattern pattern = enemy.getMovementPattern();
                 if (pattern != null) {
                     Direction nextDirection = pattern.calculateNextDirection(enemy, currentMap);
-                    
+
                     boolean moved = false;
-                    
+
                     // Lógica especial para el Calamar (SquidEnemy)
                     if (enemy instanceof SquidEnemy) {
                         Position nextPos = enemy.getPosition().move(nextDirection);
-                        // Verificar si hay hielo en la siguiente posición
+
+                        // Si hay hielo en la siguiente posición, romperlo
                         if (iceManager.hasIceBlockAt(nextPos, currentMap)) {
-                            // Romper SOLO el bloque de hielo en nextPos (no toda la línea)
                             IceBlock iceBlock = iceManager.getIceBlockAt(nextPos, currentMap);
                             if (iceBlock != null) {
                                 iceBlock.destroy();
                                 currentMap.removeEntity(iceBlock);
                                 System.out.println("Squid broke ice at " + nextPos);
                             }
-                            moved = true; // Consideramos que "actuó"
-                        } else {
-                            // Mover normal
-                            moved = movementService.moveEntity(enemy, nextDirection, currentMap);
                         }
+
+                        // Intentar mover después de romper hielo
+                        moved = movementService.moveEntity(enemy, nextDirection, currentMap);
                     } else {
                         // Enemigos normales
                         moved = movementService.moveEntity(enemy, nextDirection, currentMap);
                     }
                 }
             }
-            
+
             // Verificar colisión directa con jugadores
             for (Player player : currentMap.getPlayers()) {
                 if (player.isActive() && enemy.getPosition().equals(player.getPosition())) {
@@ -146,7 +145,7 @@ public class GameEngine {
                 for (GameEntity entity : collisions) {
                     if (entity instanceof Fruit) {
                         Fruit fruit = (Fruit) entity;
-                        
+
                         // Verificar si es un cactus peligroso
                         if (fruit instanceof CactusFruit && ((CactusFruit) fruit).isDangerous()) {
                             handlePlayerDeath(player);
@@ -182,6 +181,10 @@ public class GameEngine {
         // Muerte instantánea - Game Over directo
         player.loseLife();
         player.setInactive();
+
+        // Resetear contador de frutas al morir
+        scoreService.setFruitsCollected(0);
+        System.out.println("Contador de frutas reseteado tras muerte del jugador");
 
         System.out.println("Vidas después: " + player.getLives() + ", Activo: " + player.isActive());
 
@@ -348,9 +351,9 @@ public class GameEngine {
             // Total: 3 cerezas + 2 piñas = 5 frutas
             scoreService.setTotalFruits(5);
 
-            // Añadir enemigo maceta (persigue al jugador, no puede romper hielo)
-            currentMap.addEntity(EntityFactory.createPotEnemy(13, 9));
-            currentMap.addEntity(EntityFactory.createPotEnemy(1, 9));
+            // Añadir enemigo Troll
+            currentMap.addEntity(EntityFactory.createTrollEnemy(13, 9));
+            currentMap.addEntity(EntityFactory.createTrollEnemy(1, 9));
         } else if (levelNumber == 3) {
             // Nivel 3: Cactus (peligrosos) y Piñas
             currentPhase = 1;
@@ -373,7 +376,7 @@ public class GameEngine {
             scoreService.setTotalFruits(5);
 
             // Añadir enemigos (mezcla)
-            currentMap.addEntity(EntityFactory.createPotEnemy(13, 9));
+            currentMap.addEntity(EntityFactory.createTrollEnemy(13, 9));
             // Reemplazar enemigo básico con Calamar
             currentMap.addEntity(EntityFactory.createSquidEnemy(1, 9, currentMap));
         } else {
@@ -451,14 +454,31 @@ public class GameEngine {
      * Avanza al siguiente nivel.
      */
     public void nextLevel() {
+        // Guardar colores de los jugadores antes de cambiar de nivel
+        java.util.List<String> playerColors = new java.util.ArrayList<>();
+        if (currentMap != null) {
+            for (Player p : currentMap.getPlayers()) {
+                playerColors.add(p.getPlayerColor());
+            }
+        }
+
         currentLevelNumber++;
         // Ahora soportamos 3 niveles, reiniciar al nivel 1 después del nivel 3
         if (currentLevelNumber > 3) {
             currentLevelNumber = 1;
         }
         scoreService.nextLevel();
-        scoreService.addLevelCompletionScore();
+        // REMOVIDO: scoreService.addLevelCompletionScore(); - Los puntos se dan al
+        // completar, no al cambiar de nivel
         loadCurrentLevel();
+
+        // Restaurar colores de los jugadores después de cargar el nuevo nivel
+        if (currentMap != null && !playerColors.isEmpty()) {
+            java.util.List<Player> newPlayers = currentMap.getPlayers();
+            for (int i = 0; i < Math.min(newPlayers.size(), playerColors.size()); i++) {
+                newPlayers.get(i).setPlayerColor(playerColors.get(i));
+            }
+        }
     }
 
     /**
@@ -505,7 +525,7 @@ public class GameEngine {
     private void createLevelWithColors(int levelNumber, String player1Color, String player2Color) {
         // Crear el nivel normalmente
         createLevel(levelNumber);
-        
+
         // Actualizar colores de los jugadores
         List<com.badice.domain.entities.Player> players = currentMap.getPlayers();
         if (!players.isEmpty() && player1Color != null) {
