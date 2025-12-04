@@ -110,6 +110,14 @@ public class EntityFactory {
     }
 
     /**
+     * Crea el enemigo Maceta (Pot) - Enemigo del nivel 2.
+     * Persigue al jugador pero no puede romper hielo.
+     */
+    public static Enemy createPotEnemy(int x, int y) {
+        return new PotEnemy(new Position(x, y));
+    }
+
+    /**
      * Crea un enemigo calamar (persigue y rompe hielo).
      */
     public static SquidEnemy createSquidEnemy(int x, int y, GameMap map) {

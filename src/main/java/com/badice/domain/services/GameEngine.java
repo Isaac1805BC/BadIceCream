@@ -326,9 +326,9 @@ public class GameEngine {
             // Configurar score service - cuenta solo plátanos inicialmente
             scoreService.setTotalFruits(3);
 
-            // Añadir enemigos básicos
-            currentMap.addEntity(EntityFactory.createEnemy(13, 9, "horizontal", "basic"));
-            currentMap.addEntity(EntityFactory.createEnemy(1, 9, "vertical", "basic"));
+            // Añadir enemigos Troll (nivel 1: movimiento horizontal)
+            currentMap.addEntity(EntityFactory.createTrollEnemy(13, 9));
+            currentMap.addEntity(EntityFactory.createTrollEnemy(1, 9));
         } else if (levelNumber == 2) {
             // Nivel 2: Cerezas (teleport) y Piñas (mirror movement)
             currentPhase = 1;
@@ -351,9 +351,9 @@ public class GameEngine {
             // Total: 3 cerezas + 2 piñas = 5 frutas
             scoreService.setTotalFruits(5);
 
-            // Añadir enemigo Troll
-            currentMap.addEntity(EntityFactory.createTrollEnemy(13, 9));
-            currentMap.addEntity(EntityFactory.createTrollEnemy(1, 9));
+            // Añadir enemigo Maceta (nivel 2: persigue al jugador)
+            currentMap.addEntity(EntityFactory.createPotEnemy(13, 9));
+            currentMap.addEntity(EntityFactory.createPotEnemy(1, 9));
         } else if (levelNumber == 3) {
             // Nivel 3: Cactus (peligrosos) y Piñas
             currentPhase = 1;
@@ -375,9 +375,9 @@ public class GameEngine {
             // Total: 3 cactus + 2 piñas = 5 frutas
             scoreService.setTotalFruits(5);
 
-            // Añadir enemigos (mezcla)
-            currentMap.addEntity(EntityFactory.createTrollEnemy(13, 9));
-            // Reemplazar enemigo básico con Calamar
+            // Añadir enemigos (mezcla: Maceta + Calamar)
+            currentMap.addEntity(EntityFactory.createPotEnemy(13, 9));
+            // Calamar rompe hielo
             currentMap.addEntity(EntityFactory.createSquidEnemy(1, 9, currentMap));
         } else {
             // Otros niveles: comportamiento por defecto

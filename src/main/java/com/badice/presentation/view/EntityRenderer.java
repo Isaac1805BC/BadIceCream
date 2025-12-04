@@ -62,7 +62,7 @@ public class EntityRenderer {
 
     private void renderEnemy(Graphics2D g, Enemy enemy, int x, int y) {
         if (enemy instanceof TrollEnemy) {
-            // Troll: Enemy del nivel 1
+            // Troll: Enemy del nivel 1 (movimiento horizontal)
             BufferedImage sprite = resourceManager.getEnemySprite("troll", null);
 
             if (sprite != null) {
@@ -76,6 +76,24 @@ public class EntityRenderer {
                 g.fillOval(x + 8, y + 10, 6, 6);
                 g.fillOval(x + cellSize - 14, y + 10, 6, 6);
             }
+        } else if (enemy instanceof PotEnemy) {
+            // Maceta: Enemy del nivel 2 (persigue jugador)
+            BufferedImage sprite = resourceManager.getEnemySprite("maseta", null);
+
+            if (sprite != null) {
+                g.drawImage(sprite, x, y, cellSize, cellSize, null);
+            } else {
+                // Fallback: Brown pot with green plant
+                g.setColor(new Color(139, 69, 19)); // Brown
+                g.fillRect(x + 6, y + cellSize - 12, cellSize - 12, 10);
+                // Plant
+                g.setColor(new Color(34, 139, 34)); // Green
+                g.fillOval(x + 8, y + 6, cellSize - 16, cellSize - 12);
+                // Eyes on plant
+                g.setColor(Color.BLACK);
+                g.fillOval(x + 10, y + 12, 4, 4);
+                g.fillOval(x + cellSize - 14, y + 12, 4, 4);
+            }
         } else if (enemy instanceof SquidEnemy) {
             // Calamar
             BufferedImage sprite = resourceManager.getEnemySprite("squid", null);
@@ -87,8 +105,8 @@ public class EntityRenderer {
                 g.fillRect(x + 4, y + 4, cellSize - 8, cellSize - 8);
             }
         } else {
-            BufferedImage sprite = resourceManager.getEnemySprite("troll", null);
             // Enemigo básico (fallback)
+            BufferedImage sprite = resourceManager.getEnemySprite("basic", null);
             if (sprite != null) {
                 g.drawImage(sprite, x, y, cellSize, cellSize, null);
             } else {
