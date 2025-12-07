@@ -1,9 +1,6 @@
 package com.badice.domain.services;
 
-import com.badice.domain.entities.Direction;
-import com.badice.domain.entities.GameMap;
-import com.badice.domain.entities.IceBlock;
-import com.badice.domain.entities.Position;
+import com.badice.domain.entities.*;
 
 /**
  * Servicio que maneja la lógica de creación y destrucción de hielo.
@@ -33,7 +30,16 @@ public class IceManager {
                 break;
             }
 
-            // Crear el bloque de hielo si no existe uno ya activo
+            // Verificar si hay una baldosa caliente en esta posición
+            // Si la hay, el hielo se derrite instantáneamente (no se crea)
+            if (hasHotTileAt(currentPos, map)) {
+                System.out.println("Ice melted instantly on hot tile at " + currentPos);
+                // No crear hielo, pero continuar la línea
+                currentPos = currentPos.move(direction);
+                continue;
+            }
+
+            // Crear el bloque de hielo (incluso sobre fogatas)
             if (!hasIceBlockAt(currentPos, map)) {
                 IceBlock iceBlock = new IceBlock(currentPos);
                 map.addIceBlock(currentPos);
@@ -64,6 +70,13 @@ public class IceManager {
                 iceBlock.destroy();
                 map.removeEntity(iceBlock);
                 destroyedAny = true;
+
+                // NUEVO: Verificar si hay una fogata en esta posición y apagarla
+                Campfire campfire = getCampfireAt(currentPos, map);
+                if (campfire != null && campfire.isLit()) {
+                    campfire.extinguish();
+                    System.out.println("Campfire extinguished by destroying ice at " + currentPos);
+                }
             } else {
                 // Si encontramos un espacio sin hielo (vacío o con otra entidad), dejamos de
                 // destruir
@@ -105,5 +118,28 @@ public class IceManager {
             iceBlock.destroy();
         }
         map.cleanupInactiveEntities();
+    }
+
+    /**
+     * Verifica si hay una baldosa caliente en una posición.
+     */
+    public boolean hasHotTileAt(Position position, GameMap map) {
+        return map.getEntities().stream()
+                .filter(GameEntity::isActive)
+                .filter(entity -> entity instanceof HotTile)
+                .anyMatch(entity -> entity.getPosition().equals(position));
+    }
+
+    /**
+     * Obtiene una fogata en una posición específica.
+     */
+    public Campfire getCampfireAt(Position position, GameMap map) {
+        return map.getEntities().stream()
+                .filter(GameEntity::isActive)
+                .filter(entity -> entity instanceof Campfire)
+                .map(entity -> (Campfire) entity)
+                .filter(campfire -> campfire.getPosition().equals(position))
+                .findFirst()
+                .orElse(null);
     }
 }

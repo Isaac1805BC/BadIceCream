@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+
 /**
  * Panel para seleccionar el nivel con temática de hielo.
  */
@@ -11,6 +12,7 @@ public class LevelSelectionPanel extends JPanel {
     private JButton level1Button;
     private JButton level2Button;
     private JButton level3Button;
+    private JButton level4Button;
     private JButton backButton;
     private BufferedImage backgroundImage;
     private ResourceManager resourceManager;
@@ -29,7 +31,7 @@ public class LevelSelectionPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        
+
         // Dibujar fondo con patrón repetido
         if (backgroundImage != null) {
             int imgWidth = backgroundImage.getWidth();
@@ -52,7 +54,7 @@ public class LevelSelectionPanel extends JPanel {
         JPanel titlePanel = new JPanel();
         titlePanel.setOpaque(false);
         titlePanel.setBorder(BorderFactory.createEmptyBorder(40, 0, 20, 0));
-        
+
         JLabel titleLabel = new JLabel("SELECCIONA NIVEL");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 36));
         titleLabel.setForeground(new Color(16, 25, 34));
@@ -79,12 +81,17 @@ public class LevelSelectionPanel extends JPanel {
         levelsPanel.add(level2Button, gbc);
         gbc.gridx++;
         levelsPanel.add(level3Button, gbc);
+        gbc.gridx++;
+
+        // Nivel 4
+        level4Button = createLevelButton("NIVEL 4", "Narval y Fuego");
+        levelsPanel.add(level4Button, gbc);
 
         // Botón de volver
         JPanel bottomPanel = new JPanel();
         bottomPanel.setOpaque(false);
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 30, 0));
-        
+
         backButton = createIceButton("VOLVER AL MENÚ");
         backButton.setPreferredSize(new Dimension(300, 50));
         bottomPanel.add(backButton);
@@ -101,12 +108,11 @@ public class LevelSelectionPanel extends JPanel {
         button.setBackground(new Color(180, 220, 255));
         button.setFocusPainted(false);
         button.setBorderPainted(true);
-        
+
         // Borde con efecto de hielo
         button.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(100, 180, 255), 4),
-            BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        ));
+                BorderFactory.createLineBorder(new Color(100, 180, 255), 4),
+                BorderFactory.createEmptyBorder(15, 15, 15, 15)));
 
         // Panel interno para el contenido
         JPanel contentPanel = new JPanel();
@@ -136,17 +142,15 @@ public class LevelSelectionPanel extends JPanel {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(new Color(200, 240, 255));
                 button.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(150, 200, 255), 4),
-                    BorderFactory.createEmptyBorder(15, 15, 15, 15)
-                ));
+                        BorderFactory.createLineBorder(new Color(150, 200, 255), 4),
+                        BorderFactory.createEmptyBorder(15, 15, 15, 15)));
             }
 
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 button.setBackground(new Color(180, 220, 255));
                 button.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(100, 180, 255), 4),
-                    BorderFactory.createEmptyBorder(15, 15, 15, 15)
-                ));
+                        BorderFactory.createLineBorder(new Color(100, 180, 255), 4),
+                        BorderFactory.createEmptyBorder(15, 15, 15, 15)));
             }
         });
 
@@ -160,12 +164,11 @@ public class LevelSelectionPanel extends JPanel {
         button.setBackground(new Color(180, 220, 255));
         button.setFocusPainted(false);
         button.setBorderPainted(true);
-        
+
         // Borde con efecto de hielo
         button.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(100, 180, 255), 3),
-            BorderFactory.createEmptyBorder(10, 20, 10, 20)
-        ));
+                BorderFactory.createLineBorder(new Color(100, 180, 255), 3),
+                BorderFactory.createEmptyBorder(10, 20, 10, 20)));
 
         // Efecto hover
         button.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -192,6 +195,10 @@ public class LevelSelectionPanel extends JPanel {
 
     public void setLevel3ButtonListener(ActionListener listener) {
         level3Button.addActionListener(listener);
+    }
+
+    public void setLevel4ButtonListener(ActionListener listener) {
+        level4Button.addActionListener(listener);
     }
 
     public void setBackButtonListener(ActionListener listener) {

@@ -61,61 +61,58 @@ public class EntityRenderer {
     }
 
     private void renderEnemy(Graphics2D g, Enemy enemy, int x, int y) {
+        BufferedImage sprite = null;
+
+        // Determinar qué sprite cargar basado en el tipo de enemigo
         if (enemy instanceof TrollEnemy) {
-            // Troll: Enemy del nivel 1 (movimiento horizontal)
-            BufferedImage sprite = resourceManager.getEnemySprite("troll", null);
-
-            if (sprite != null) {
-                g.drawImage(sprite, x, y, cellSize, cellSize, null);
-            } else {
-                // Fallback: Red square with eyes
-                g.setColor(Color.RED);
-                g.fillRect(x + 4, y + 4, cellSize - 8, cellSize - 8);
-                g.setColor(Color.DARK_GRAY);
-                // Eyes
-                g.fillOval(x + 8, y + 10, 6, 6);
-                g.fillOval(x + cellSize - 14, y + 10, 6, 6);
-            }
+            sprite = resourceManager.loadImage("sprites/enemies/troll.png");
         } else if (enemy instanceof PotEnemy) {
-            // Maceta: Enemy del nivel 2 (persigue jugador)
-            BufferedImage sprite = resourceManager.getEnemySprite("maseta", null);
-
-            if (sprite != null) {
-                g.drawImage(sprite, x, y, cellSize, cellSize, null);
-            } else {
-                // Fallback: Brown pot with green plant
-                g.setColor(new Color(139, 69, 19)); // Brown
-                g.fillRect(x + 6, y + cellSize - 12, cellSize - 12, 10);
-                // Plant
-                g.setColor(new Color(34, 139, 34)); // Green
-                g.fillOval(x + 8, y + 6, cellSize - 16, cellSize - 12);
-                // Eyes on plant
-                g.setColor(Color.BLACK);
-                g.fillOval(x + 10, y + 12, 4, 4);
-                g.fillOval(x + cellSize - 14, y + 12, 4, 4);
-            }
+            sprite = resourceManager.loadImage("sprites/enemies/maseta.png");
         } else if (enemy instanceof SquidEnemy) {
-            // Calamar
-            BufferedImage sprite = resourceManager.getEnemySprite("squid", null);
-            if (sprite != null) {
-                g.drawImage(sprite, x, y, cellSize, cellSize, null);
-            } else {
-                // Fallback: Pink square
-                g.setColor(Color.PINK);
-                g.fillRect(x + 4, y + 4, cellSize - 8, cellSize - 8);
-            }
+            sprite = resourceManager.loadImage("sprites/enemies/calamar.png");
+        } else if (enemy instanceof NarvalEnemy) {
+            // NUEVO: Sprite para Narval
+            sprite = resourceManager.loadImage("sprites/enemies/Narval.png");
+        }
+
+        if (sprite != null) {
+            // Escalar sprite al tamaño de la celda
+            Image scaledSprite = sprite.getScaledInstance(cellSize, cellSize, Image.SCALE_SMOOTH);
+            g.drawImage(scaledSprite, x, y, null);
         } else {
-            // Enemigo básico (fallback)
-            BufferedImage sprite = resourceManager.getEnemySprite("basic", null);
-            if (sprite != null) {
-                g.drawImage(sprite, x, y, cellSize, cellSize, null);
+            // Fallback: renderizado básico
+            if (enemy instanceof TrollEnemy) {
+                g.setColor(new Color(139, 69, 19)); // Marrón para Troll
+            } else if (enemy instanceof PotEnemy) {
+                g.setColor(new Color(34, 139, 34)); // Verde para Maceta
+            } else if (enemy instanceof SquidEnemy) {
+                g.setColor(new Color(255, 140, 0)); // Naranja para Calamar
+            } else if (enemy instanceof NarvalEnemy) {
+                // NUEVO: Color para Narval
+                NarvalEnemy narval = (NarvalEnemy) enemy;
+                if (narval.isCharging()) {
+                    g.setColor(new Color(255, 0, 0)); // Rojo cuando embiste
+                } else {
+                    g.setColor(new Color(70, 130, 180)); // Azul acero normal
+                }
             } else {
                 g.setColor(Color.RED);
-                g.fillRect(x + 4, y + 4, cellSize - 8, cellSize - 8);
-                g.setColor(Color.DARK_GRAY);
-                // Ojos
-                g.fillOval(x + 8, y + 10, 6, 6);
-                g.fillOval(x + cellSize - 14, y + 10, 6, 6);
+            }
+
+            // Dibujar círculo para enemigo
+            int margin = cellSize / 6;
+            g.fillOval(x + margin, y + margin, cellSize - 2 * margin, cellSize - 2 * margin);
+
+            // Borde negro
+            g.setColor(Color.BLACK);
+            g.drawOval(x + margin, y + margin, cellSize - 2 * margin, cellSize - 2 * margin);
+
+            // Indicador visual para Narval cargando
+            if (enemy instanceof NarvalEnemy && ((NarvalEnemy) enemy).isCharging()) {
+                g.setColor(Color.YELLOW);
+                g.setStroke(new BasicStroke(3));
+                g.drawOval(x + margin - 2, y + margin - 2, cellSize - 2 * margin + 4, cellSize - 2 * margin + 4);
+                g.setStroke(new BasicStroke(1));
             }
         }
     }
@@ -130,8 +127,6 @@ public class EntityRenderer {
         if (sprite != null) {
             g.drawImage(sprite, x, y, cellSize, cellSize, null);
         } else {
-            // Debug: Log when sprite is not found
-            System.out.println("Sprite not found for fruit: " + fruit.getFruitType());
             // Fallback: Colores según tipo de fruta
             Color mainColor, borderColor;
             String type = fruit.getFruitType().toLowerCase();
@@ -175,34 +170,59 @@ public class EntityRenderer {
     }
 
     private void renderIceBlock(Graphics2D g, IceBlock ice, int x, int y) {
-        // Aumentar el tamaño del bloque de hielo para que se vea mejor
-        int padding = 2; // Reducir padding para que el bloque sea más grande
+        int padding = 2;
         g.setColor(new Color(135, 206, 235, 200)); // Sky blue con transparencia
         g.fillRect(x + padding, y + padding, cellSize - (padding * 2), cellSize - (padding * 2));
         g.setColor(new Color(173, 216, 230));
         g.drawRect(x + padding, y + padding, cellSize - (padding * 2) - 1, cellSize - (padding * 2) - 1);
 
-        // Efecto de hielo más visible
+        // Efecto de hielo
         g.setColor(new Color(255, 255, 255, 150));
         g.drawLine(x + padding + 2, y + padding + 2, x + cellSize - padding - 3, y + padding + 2);
         g.drawLine(x + padding + 2, y + padding + 2, x + padding + 2, y + cellSize - padding - 3);
     }
 
     private void renderBlock(Graphics2D g, Block block, int x, int y) {
-        BufferedImage sprite = resourceManager.getBlockSprite(block.getBlockType());
+        BufferedImage sprite = null;
+
+        // Determinar qué sprite cargar basado en el tipo de bloque
+        if (block instanceof Campfire) {
+            // NUEVO: Sprite para Fogata
+            sprite = resourceManager.loadImage("sprites/obstacles/Fogata.png");
+        } else if (block instanceof HotTile) {
+            // NUEVO: Sprite para Baldosa Caliente
+            sprite = resourceManager.loadImage("sprites/obstacles/Baldosa_caliente.png");
+        } else {
+            // Intentar cargar sprite de bloque normal
+            sprite = resourceManager.getBlockSprite(block.getBlockType());
+        }
 
         if (sprite != null) {
-            g.drawImage(sprite, x, y, cellSize, cellSize, null);
+            // Escalar sprite al tamaño de la celda
+            Image scaledSprite = sprite.getScaledInstance(cellSize, cellSize, Image.SCALE_SMOOTH);
+            g.drawImage(scaledSprite, x, y, null);
         } else {
-            g.setColor(new Color(0, 107, 201));
-            g.fillRect(x, y, cellSize, cellSize);
-            g.setColor(new Color(76, 169, 255));
-            g.drawRect(x, y, cellSize - 1, cellSize - 1);
+            // Fallback: renderizado básico según el tipo
+            if (block instanceof Campfire) {
+                Campfire campfire = (Campfire) block;
+                if (campfire.isLit()) {
+                    // Fogata encendida - rojo/naranja
+                    g.setColor(new Color(255, 69, 0));
+                } else {
+                    // Fogata apagada - gris
+                    g.setColor(new Color(128, 128, 128));
+                }
+            } else if (block instanceof HotTile) {
+                // Baldosa caliente - naranja brillante
+                g.setColor(new Color(255, 140, 0));
+            } else {
+                // Bloque normal - azul
+                g.setColor(new Color(0, 107, 201));
+            }
 
-            // Textura de ladrillo
-            g.setColor(new Color(76, 169, 255));
-            g.drawLine(x + cellSize / 2, y, x + cellSize / 2, y + cellSize);
-            g.drawLine(x, y + cellSize / 2, x + cellSize, y + cellSize / 2);
+            g.fillRect(x, y, cellSize, cellSize);
+            g.setColor(Color.BLACK);
+            g.drawRect(x, y, cellSize, cellSize);
         }
     }
 
@@ -210,9 +230,7 @@ public class EntityRenderer {
      * Renderiza el fondo/grid del mapa.
      */
     public void renderGrid(Graphics2D g, int width, int height) {
-        // NO dibujar fondo sólido aquí - el background se dibuja en GamePanel
-
-        // Grid semi-transparente para que se vea el background
+        // Grid semi-transparente
         g.setColor(new Color(255, 255, 255, 30)); // Blanco muy transparente
         for (int x = 0; x <= width; x++) {
             g.drawLine(x * cellSize, 0, x * cellSize, height * cellSize);

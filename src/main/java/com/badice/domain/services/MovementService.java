@@ -3,8 +3,10 @@ package com.badice.domain.services;
 import com.badice.domain.entities.Direction;
 import com.badice.domain.entities.Enemy;
 import com.badice.domain.entities.GameMap;
+import com.badice.domain.entities.IceBlock;
 import com.badice.domain.entities.Player;
 import com.badice.domain.entities.Position;
+
 import com.badice.domain.interfaces.Collidable;
 import com.badice.domain.interfaces.Movable;
 
@@ -32,15 +34,16 @@ public class MovementService {
             return false;
         }
 
-        // Verificar colisiones
         // Si es un enemigo, permitimos que se mueva a la posición del jugador para
         // "matarlo"
         if (entity instanceof Enemy) {
             boolean blockedByNonPlayer = map.getEntities().stream()
                     .filter(e -> e.isActive() && e instanceof Collidable)
+                    .filter(e -> !(e instanceof IceBlock)) // Ignorar hielos (ya fueron destruidos por el pattern)
                     .map(e -> (Collidable) e)
                     .filter(Collidable::isSolid)
                     .filter(e -> !(e instanceof Player)) // Ignorar al jugador
+                    .filter(e -> !e.equals(entity)) // Ignorar a sí mismo
                     .anyMatch(e -> e.getCollisionPosition().equals(targetPosition));
 
             if (blockedByNonPlayer) {
@@ -55,13 +58,12 @@ public class MovementService {
                             .filter(e -> e.isActive() && e instanceof Collidable)
                             .map(e -> (Collidable) e)
                             .filter(Collidable::isSolid)
-                            .filter(e -> !(e instanceof Enemy)) // Ignorar enemigos (permitir colisión para morir)
+                            .filter(e -> !(e instanceof Enemy)) // Ignorar enemigos
                             .anyMatch(e -> e.getCollisionPosition().equals(targetPosition));
-                    
+
                     if (blockedByNonEnemy) {
                         return false;
                     }
-                    // Si solo bloquea un enemigo, permitimos el movimiento para que ocurra la colisión
                 } else {
                     return false;
                 }

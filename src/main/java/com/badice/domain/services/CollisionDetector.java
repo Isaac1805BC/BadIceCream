@@ -79,6 +79,22 @@ public class CollisionDetector {
                 }
             } else if (entity instanceof Enemy) {
                 handlePlayerEnemyCollision(player, (Enemy) entity);
+            } else if (entity instanceof Campfire) {
+                Campfire campfire = (Campfire) entity;
+                if (campfire.isLit()) {
+                    handlePlayerCampfireCollision(player, campfire);
+                }
+            }
+        }
+
+        // ADICIONAL: Verificar fogatas en la posición actual del jugador
+        // (para cuando el jugador está quieto sobre una fogata)
+        for (GameEntity entity : map.getEntities()) {
+            if (entity instanceof Campfire && entity.isActive()) {
+                Campfire campfire = (Campfire) entity;
+                if (campfire.isLit() && campfire.getPosition().equals(player.getPosition())) {
+                    handlePlayerCampfireCollision(player, campfire);
+                }
             }
         }
     }
@@ -107,5 +123,15 @@ public class CollisionDetector {
         }
 
         return entities;
+    }
+
+    /**
+     * Maneja la colisión entre jugador y fogata encendida.
+     */
+    private void handlePlayerCampfireCollision(Player player, Campfire campfire) {
+        // El jugador muere instantáneamente
+        player.loseLife();
+        player.setInactive();
+        System.out.println("¡Jugador eliminado por fogata!");
     }
 }

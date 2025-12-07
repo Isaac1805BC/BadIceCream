@@ -49,7 +49,7 @@ public class ActionMapper {
 
         // Otras acciones
         switch (keyCode) {
-            // case KeyEvent.VK_SPACE -> handleIceAction(); // Ya manejado arriba
+            // case KeyEvent.VK_SPACE -> handleIceAction();
             case KeyEvent.VK_P -> handlePauseToggle();
             case KeyEvent.VK_ESCAPE -> handleEscape();
             case KeyEvent.VK_R -> handleRestart();

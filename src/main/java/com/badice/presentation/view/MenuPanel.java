@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
  */
 public class MenuPanel extends JPanel {
     private JButton playButton;
+    private JButton loadGameButton;
     private JButton selectLevelButton;
     private JButton exitButton;
     private BufferedImage backgroundImage;
@@ -86,6 +87,9 @@ public class MenuPanel extends JPanel {
         // Botón JUGAR
         playButton = createMenuButton("JUGAR");
 
+        // Botón CARGAR PARTIDA
+        loadGameButton = createMenuButton("CARGAR PARTIDA");
+
         // Botón SELECCIONAR NIVEL
         selectLevelButton = createMenuButton("SELECCIONAR NIVEL");
 
@@ -94,6 +98,8 @@ public class MenuPanel extends JPanel {
 
         buttonPanel.add(Box.createVerticalGlue());
         buttonPanel.add(playButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        buttonPanel.add(loadGameButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
         buttonPanel.add(selectLevelButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 15)));
@@ -131,6 +137,10 @@ public class MenuPanel extends JPanel {
     // Métodos para configurar listeners
     public void setPlayButtonListener(ActionListener listener) {
         playButton.addActionListener(listener);
+    }
+
+    public void setLoadGameButtonListener(ActionListener listener) {
+        loadGameButton.addActionListener(listener);
     }
 
     public void setSelectLevelButtonListener(ActionListener listener) {

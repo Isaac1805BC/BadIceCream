@@ -103,6 +103,20 @@ public class EntityFactory {
     }
 
     /**
+     * Crea una fogata (campfire).
+     */
+    public static Campfire createCampfire(int x, int y) {
+        return new Campfire(new Position(x, y));
+    }
+
+    /**
+     * Crea una baldosa caliente (hot tile).
+     */
+    public static HotTile createHotTile(int x, int y) {
+        return new HotTile(new Position(x, y));
+    }
+
+    /**
      * Crea el enemigo Troll - Enemigo del nivel 1.
      */
     public static Enemy createTrollEnemy(int x, int y) {
@@ -123,6 +137,14 @@ public class EntityFactory {
     public static SquidEnemy createSquidEnemy(int x, int y, GameMap map) {
         // Usa ChaseMovementPattern por defecto
         return new SquidEnemy(new Position(x, y), new ChaseMovementPattern());
+    }
+
+    /**
+     * Crea un enemigo narval (embiste al alinearse con el jugador).
+     */
+    public static NarvalEnemy createNarvalEnemy(int x, int y) {
+        // Usa movimiento horizontal/vertical aleatorio
+        return new NarvalEnemy(new Position(x, y), new RandomMovementPattern());
     }
 
     /**

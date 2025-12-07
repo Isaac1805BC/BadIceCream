@@ -10,6 +10,7 @@ import com.badice.domain.interfaces.MovementPattern;
  * y cambia de dirección al encontrar un obstáculo.
  */
 public class VerticalMovementPattern implements MovementPattern {
+    private static final long serialVersionUID = 1L;
     private Direction currentDirection;
 
     public VerticalMovementPattern() {

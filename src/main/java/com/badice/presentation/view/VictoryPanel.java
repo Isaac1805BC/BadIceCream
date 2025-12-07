@@ -80,7 +80,7 @@ public class VictoryPanel extends JPanel {
         // Puntos
         pointsLabel = new JLabel("0 PUNTOS");
         pointsLabel.setFont(new Font("Arial", Font.BOLD, 42));
-        pointsLabel.setForeground(Color.WHITE);
+        pointsLabel.setForeground(Color.BLACK);
         pointsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         centerPanel.add(pointsLabel);
 

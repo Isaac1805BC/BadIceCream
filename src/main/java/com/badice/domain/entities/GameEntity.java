@@ -1,12 +1,14 @@
 package com.badice.domain.entities;
 
 import java.util.UUID;
+import java.io.Serializable;
 
 /**
  * Clase abstracta base para todas las entidades del juego.
  * Implementa el patrón Template Method para comportamientos comunes.
  */
-public abstract class GameEntity {
+public abstract class GameEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
     protected final String id;
     protected Position position;
     protected boolean active;

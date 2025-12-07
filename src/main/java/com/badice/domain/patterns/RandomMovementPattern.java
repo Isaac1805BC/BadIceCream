@@ -12,6 +12,7 @@ import java.util.Random;
  * aleatoriamente.
  */
 public class RandomMovementPattern implements MovementPattern {
+    private static final long serialVersionUID = 1L;
     private static final Direction[] DIRECTIONS = Direction.values();
     private final Random random;
     private Direction currentDirection;
@@ -33,8 +34,9 @@ public class RandomMovementPattern implements MovementPattern {
     public Direction calculateNextDirection(Enemy enemy, GameMap map) {
         var nextPosition = enemy.getPosition().move(currentDirection);
 
-        // Si la posición está bloqueada, elegir una nueva dirección aleatoria
-        if (!map.isValidPosition(nextPosition) || map.isPositionBlocked(nextPosition)) {
+        // Si la posición está bloqueada (por algo que no sea jugador), elegir nueva
+        // dirección
+        if (!isValidMove(nextPosition, map)) {
             chooseNewDirection(enemy, map);
         }
 
@@ -47,7 +49,7 @@ public class RandomMovementPattern implements MovementPattern {
             Direction newDirection = DIRECTIONS[random.nextInt(DIRECTIONS.length)];
             var testPosition = enemy.getPosition().move(newDirection);
 
-            if (map.isValidPosition(testPosition) && !map.isPositionBlocked(testPosition)) {
+            if (isValidMove(testPosition, map)) {
                 currentDirection = newDirection;
                 stepsTaken = 0;
                 return;
@@ -72,5 +74,19 @@ public class RandomMovementPattern implements MovementPattern {
     public void reset() {
         this.currentDirection = DIRECTIONS[random.nextInt(DIRECTIONS.length)];
         this.stepsTaken = 0;
+    }
+
+    private boolean isValidMove(com.badice.domain.entities.Position pos, GameMap map) {
+        if (!map.isValidPosition(pos)) {
+            return false;
+        }
+
+        // Verificar si está bloqueado por algo que NO sea un jugador
+        return !map.getEntities().stream()
+                .filter(e -> e.isActive() && e instanceof com.badice.domain.interfaces.Collidable)
+                .map(e -> (com.badice.domain.interfaces.Collidable) e)
+                .filter(com.badice.domain.interfaces.Collidable::isSolid)
+                .filter(e -> !(e instanceof com.badice.domain.entities.Player)) // Ignorar al jugador
+                .anyMatch(e -> e.getCollisionPosition().equals(pos));
     }
 }

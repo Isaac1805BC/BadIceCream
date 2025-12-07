@@ -10,6 +10,7 @@ import com.badice.domain.interfaces.MovementPattern;
  * y cambia de dirección al encontrar un obstáculo.
  */
 public class HorizontalMovementPattern implements MovementPattern {
+    private static final long serialVersionUID = 1L;
     private Direction currentDirection;
 
     public HorizontalMovementPattern() {
@@ -23,7 +24,9 @@ public class HorizontalMovementPattern implements MovementPattern {
 
         // Si la siguiente posición está bloqueada o fuera de límites, cambiar de
         // dirección
-        if (!map.isValidPosition(nextPosition) || map.isPositionBlocked(nextPosition)) {
+        // Si la siguiente posición está bloqueada (por algo que no sea jugador) o fuera
+        // de límites, cambiar de dirección
+        if (!isValidMove(nextPosition, map)) {
             currentDirection = currentDirection.opposite();
         }
 
@@ -38,5 +41,19 @@ public class HorizontalMovementPattern implements MovementPattern {
     @Override
     public void reset() {
         this.currentDirection = Direction.RIGHT;
+    }
+
+    private boolean isValidMove(com.badice.domain.entities.Position pos, GameMap map) {
+        if (!map.isValidPosition(pos)) {
+            return false;
+        }
+
+        // Verificar si está bloqueado por algo que NO sea un jugador
+        return !map.getEntities().stream()
+                .filter(e -> e.isActive() && e instanceof com.badice.domain.interfaces.Collidable)
+                .map(e -> (com.badice.domain.interfaces.Collidable) e)
+                .filter(com.badice.domain.interfaces.Collidable::isSolid)
+                .filter(e -> !(e instanceof com.badice.domain.entities.Player)) // Ignorar al jugador
+                .anyMatch(e -> e.getCollisionPosition().equals(pos));
     }
 }

@@ -1,6 +1,7 @@
 package com.badice.domain.entities;
 
 import com.badice.domain.interfaces.Collidable;
+import java.io.Serializable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +9,8 @@ import java.util.List;
 /**
  * Representa el mapa del juego con todas las entidades.
  */
-public class GameMap {
+public class GameMap implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final int width;
     private final int height;
     private final int cellSize;

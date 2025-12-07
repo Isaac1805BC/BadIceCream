@@ -1,11 +1,13 @@
 package com.badice.domain.entities;
 
 import java.util.Objects;
+import java.io.Serializable;
 
 /**
  * Representa una posición en el mapa del juego (coordenadas X, Y).
  */
-public class Position {
+public class Position implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final int x;
     private final int y;
 
@@ -47,8 +49,10 @@ public class Position {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Position position = (Position) o;
         return x == position.x && y == position.y;
     }

@@ -9,7 +9,7 @@ import com.badice.domain.interfaces.Collidable;
 public abstract class Fruit extends GameEntity implements Collidable {
     private static final String ENTITY_TYPE = "FRUIT";
 
-    protected String fruitType; // manzana, fresa, cereza, etc.
+    protected String fruitType;
     protected int points;
     protected boolean collected;
 

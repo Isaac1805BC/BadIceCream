@@ -10,6 +10,7 @@ import com.badice.domain.interfaces.MovementPattern;
  * (derecha -> abajo -> izquierda -> arriba -> repetir).
  */
 public class CircularMovementPattern implements MovementPattern {
+    private static final long serialVersionUID = 1L;
     private static final Direction[] PATTERN = {
             Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP
     };

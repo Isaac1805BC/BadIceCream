@@ -2,10 +2,10 @@ package com.badice.domain.services;
 
 import com.badice.domain.entities.*;
 import com.badice.domain.interfaces.MovementPattern;
+import com.badice.domain.models.GameSaveData;
 import com.badice.domain.states.GameState;
 import com.badice.domain.states.MenuState;
 import com.badice.domain.factories.EntityFactory;
-import com.badice.domain.states.GameOverState;
 import com.badice.domain.states.GameOverState;
 import com.badice.domain.enums.GameMode;
 import java.util.List;
@@ -102,8 +102,41 @@ public class GameEngine {
 
                     boolean moved = false;
 
+                    // NUEVO: Lógica especial para el Narval (NarvalEnemy)
+                    if (enemy instanceof NarvalEnemy) {
+                        NarvalEnemy narval = (NarvalEnemy) enemy;
+
+                        // Verificar alineación con jugadores
+                        for (Player player : currentMap.getPlayers()) {
+                            if (player.isActive() && narval.isAlignedWithPlayer(player)) {
+                                narval.startCharge();
+                                break;
+                            }
+                        }
+
+                        // Si está cargando, moverse en dirección de embestida y destruir hielo
+                        if (narval.isCharging()) {
+                            Position nextPos = narval.getPosition().move(narval.getChargeDirection());
+
+                            // Destruir hielo durante embestida
+                            if (iceManager.hasIceBlockAt(nextPos, currentMap)) {
+                                IceBlock iceBlock = iceManager.getIceBlockAt(nextPos, currentMap);
+                                if (iceBlock != null) {
+                                    iceBlock.destroy();
+                                    currentMap.removeEntity(iceBlock);
+                                    System.out.println("Narval broke ice at " + nextPos);
+                                }
+                            }
+
+                            // Moverse en dirección de embestida
+                            moved = movementService.moveEntity(narval, narval.getChargeDirection(), currentMap);
+                        } else {
+                            // Movimiento normal - usar patrón de movimiento
+                            moved = movementService.moveEntity(narval, nextDirection, currentMap);
+                        }
+                    }
                     // Lógica especial para el Calamar (SquidEnemy)
-                    if (enemy instanceof SquidEnemy) {
+                    else if (enemy instanceof SquidEnemy) {
                         Position nextPos = enemy.getPosition().move(nextDirection);
 
                         // Si hay hielo en la siguiente posición, romperlo
@@ -355,7 +388,7 @@ public class GameEngine {
             currentMap.addEntity(EntityFactory.createPotEnemy(13, 9));
             currentMap.addEntity(EntityFactory.createPotEnemy(1, 9));
         } else if (levelNumber == 3) {
-            // Nivel 3: Cactus (peligrosos) y Piñas
+            // Nivel 3: Cactus (peligrosos) y Piñas + FOGATAS
             currentPhase = 1;
             totalPhases = 1;
 
@@ -375,10 +408,44 @@ public class GameEngine {
             // Total: 3 cactus + 2 piñas = 5 frutas
             scoreService.setTotalFruits(5);
 
+            // NUEVO: Añadir FOGATAS en posiciones estratégicas
+            currentMap.addEntity(EntityFactory.createCampfire(6, 3));
+            currentMap.addEntity(EntityFactory.createCampfire(8, 3));
+            currentMap.addEntity(EntityFactory.createCampfire(7, 7));
+
             // Añadir enemigos (mezcla: Maceta + Calamar)
             currentMap.addEntity(EntityFactory.createPotEnemy(13, 9));
             // Calamar rompe hielo
             currentMap.addEntity(EntityFactory.createSquidEnemy(1, 9, currentMap));
+        } else if (levelNumber == 4) {
+            // Nivel 4: NUEVO - Con BALDOSAS CALIENTES, NARVAL y 3 FASES
+            currentPhase = 1;
+            totalPhases = 3;
+
+            Player player = currentMap.getPlayer();
+
+            // FASE 1: Plátanos (100 pts c/u) - NUEVAS POSICIONES sin bloques
+            currentMap.addEntity(EntityFactory.createBasicFruit(1, 2, "platano", 100));
+            currentMap.addEntity(EntityFactory.createBasicFruit(13, 2, "platano", 100));
+            currentMap.addEntity(EntityFactory.createBasicFruit(7, 2, "platano", 100));
+
+            scoreService.setTotalFruits(3);
+
+            // NUEVO: Añadir BALDOSAS CALIENTES (no bloquean pero derriten hielo)
+            currentMap.addEntity(EntityFactory.createHotTile(4, 5));
+            currentMap.addEntity(EntityFactory.createHotTile(10, 5));
+            currentMap.addEntity(EntityFactory.createHotTile(7, 6));
+            currentMap.addEntity(EntityFactory.createHotTile(5, 8));
+            currentMap.addEntity(EntityFactory.createHotTile(9, 8));
+
+            // NUEVO: Añadir FOGATAS también
+            currentMap.addEntity(EntityFactory.createCampfire(2, 5));
+            currentMap.addEntity(EntityFactory.createCampfire(12, 5));
+
+            // NUEVO: Enemigo NARVAL que embiste
+            currentMap.addEntity(EntityFactory.createNarvalEnemy(7, 9));
+            // Añadir también un Calamar para variedad
+            currentMap.addEntity(EntityFactory.createSquidEnemy(13, 5, currentMap));
         } else {
             // Otros niveles: comportamiento por defecto
             currentPhase = 1;
@@ -413,6 +480,21 @@ public class GameEngine {
 
             // Actualizar score service para contar uvas
             scoreService.nextPhase(5); // 5 uvas
+        } else if (currentLevelNumber == 4 && currentPhase == 2) {
+            // Nivel 4, Fase 2: Uvas moradas (50 pts c/u)
+            currentMap.addEntity(EntityFactory.createBasicFruit(2, 3, "uva", 50));
+            currentMap.addEntity(EntityFactory.createBasicFruit(12, 3, "uva", 50));
+            currentMap.addEntity(EntityFactory.createBasicFruit(5, 7, "uva", 50));
+            currentMap.addEntity(EntityFactory.createBasicFruit(9, 7, "uva", 50));
+
+            scoreService.nextPhase(4); // 4 uvas
+        } else if (currentLevelNumber == 4 && currentPhase == 3) {
+            // Nivel 4, Fase 3: Cerezas (teletransporte, 150 pts c/u)
+            currentMap.addEntity(EntityFactory.createCherryFruit(4, 2, currentMap));
+            currentMap.addEntity(EntityFactory.createCherryFruit(10, 2, currentMap));
+            currentMap.addEntity(EntityFactory.createCherryFruit(7, 8, currentMap));
+
+            scoreService.nextPhase(3); // 3 cerezas
         }
     }
 
@@ -463,8 +545,8 @@ public class GameEngine {
         }
 
         currentLevelNumber++;
-        // Ahora soportamos 3 niveles, reiniciar al nivel 1 después del nivel 3
-        if (currentLevelNumber > 3) {
+        // Ahora soportamos 4 niveles, reiniciar al nivel 1 después del nivel 4
+        if (currentLevelNumber > 4) {
             currentLevelNumber = 1;
         }
         scoreService.nextLevel();
@@ -563,6 +645,50 @@ public class GameEngine {
             this.gameStartTime += pauseDuration;
             this.isPaused = false;
         }
+    }
+
+    /**
+     * Obtiene el estado actual del juego para guardarlo.
+     */
+    public GameSaveData getGameState() {
+        Player player = currentMap != null ? currentMap.getPlayer() : null;
+        int lives = player != null ? player.getLives() : 0;
+
+        return new GameSaveData(
+                currentMap,
+                player,
+                currentLevelNumber,
+                scoreService.getCurrentScore(),
+                lives,
+                getElapsedTime() // Guardamos el tiempo transcurrido
+        );
+    }
+
+    /**
+     * Restaura el estado del juego desde un objeto guardado.
+     */
+    public void restoreGameState(GameSaveData state) {
+        this.currentMap = state.getGameMap();
+        this.currentLevelNumber = state.getCurrentLevel();
+
+        // Restaurar puntuación
+        scoreService.resetCurrentScore();
+        scoreService.addScore(state.getScore());
+        scoreService.setCurrentLevel(state.getCurrentLevel());
+
+        // Restaurar tiempo
+        // Ajustamos el tiempo de inicio para que coincida con el tiempo guardado
+        this.gameStartTime = System.currentTimeMillis() - state.getTimeRemaining();
+
+        // Asegurar que el mapa tenga las referencias correctas si es necesario
+        if (currentMap != null) {
+            // Re-vincular collisionDetector al movementService si fuera necesario,
+            // pero MovementService se crea fresco en GameEngine.
+            // Lo importante es que las entidades en el mapa sean válidas.
+        }
+
+        // Forzar actualización de UI
+        update();
     }
 
     public long getElapsedTime() {

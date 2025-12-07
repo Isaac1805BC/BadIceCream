@@ -31,6 +31,7 @@ public class GameController {
 
     private final InputHandler inputHandler;
     private final ActionMapper actionMapper;
+    private final com.badice.domain.services.PersistenceService persistenceService;
 
     private Timer gameLoopTimer;
     private Timer renderTimer;
@@ -39,6 +40,7 @@ public class GameController {
         this.gameEngine = new GameEngine();
         this.actionMapper = new ActionMapper(gameEngine);
         this.inputHandler = new InputHandler(actionMapper);
+        this.persistenceService = new com.badice.domain.services.PersistenceService();
 
         // Crear vistas
         this.gamePanel = new GamePanel(gameEngine);
@@ -63,6 +65,7 @@ public class GameController {
     private void setupEventHandlers() {
         // Menu panel listeners
         menuPanel.setPlayButtonListener(e -> showGameModeSelection());
+        menuPanel.setLoadGameButtonListener(e -> loadGame());
         menuPanel.setSelectLevelButtonListener(e -> showLevelSelection());
         menuPanel.setExitButtonListener(e -> System.exit(0));
 
@@ -77,6 +80,7 @@ public class GameController {
         levelSelectionPanel.setLevel1ButtonListener(e -> showGameModeSelectionForLevel(1));
         levelSelectionPanel.setLevel2ButtonListener(e -> showGameModeSelectionForLevel(2));
         levelSelectionPanel.setLevel3ButtonListener(e -> showGameModeSelectionForLevel(3));
+        levelSelectionPanel.setLevel4ButtonListener(e -> showGameModeSelectionForLevel(4));
         levelSelectionPanel.setBackButtonListener(e -> showMenu());
 
         // Player color selection panel listeners
@@ -100,6 +104,18 @@ public class GameController {
 
         // Input handler
         gamePanel.addKeyListener(inputHandler);
+
+        // Save/Load key listener (F5/F9)
+        gamePanel.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                if (e.getKeyCode() == java.awt.event.KeyEvent.VK_F5) {
+                    saveGame();
+                } else if (e.getKeyCode() == java.awt.event.KeyEvent.VK_F9) {
+                    loadGame();
+                }
+            }
+        });
     }
 
     /**
@@ -363,6 +379,62 @@ public class GameController {
     private void stopGameLoop() {
         gameLoopTimer.stop();
         renderTimer.stop();
+    }
+
+    /**
+     * Guarda el juego actual.
+     */
+    private void saveGame() {
+        if (!gameEngine.getStateManager().isInState(PlayingState.class) && !gameEngine.isPaused()) {
+            JOptionPane.showMessageDialog(mainFrame, "Solo puedes guardar durante el juego.", "Error",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            com.badice.domain.models.GameSaveData data = gameEngine.getGameState();
+            persistenceService.saveGame(data);
+            JOptionPane.showMessageDialog(mainFrame, "¡Juego guardado correctamente!", "Guardado",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(mainFrame, "Error al guardar el juego: " + e.getMessage(), "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Carga el juego guardado.
+     */
+    private void loadGame() {
+        if (!persistenceService.hasSavedGame()) {
+            JOptionPane.showMessageDialog(mainFrame, "No hay partida guardada.", "Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            com.badice.domain.models.GameSaveData data = persistenceService.loadGame();
+
+            // Pausar loop antes de restaurar
+            stopGameLoop();
+
+            // Restaurar estado
+            gameEngine.restoreGameState(data);
+            gameEngine.changeState(new PlayingState());
+
+            // Re-vincular UI si es necesario y refrescar
+            showGamePanel();
+
+            // Reiniciar loop
+            startGameLoop();
+
+            JOptionPane.showMessageDialog(mainFrame, "¡Juego cargado correctamente!", "Cargado",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(mainFrame, "Error al cargar el juego: " + e.getMessage(), "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**

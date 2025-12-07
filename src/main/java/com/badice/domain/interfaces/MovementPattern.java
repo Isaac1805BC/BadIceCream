@@ -4,11 +4,12 @@ import com.badice.domain.entities.GameEntity;
 import com.badice.domain.entities.GameMap;
 import com.badice.domain.entities.Direction;
 import com.badice.domain.entities.Enemy;
+import java.io.Serializable;
 
 /**
  * Interfaz Strategy para definir patrones de movimiento de enemigos.
  */
-public interface MovementPattern {
+public interface MovementPattern extends Serializable {
     /**
      * Calcula la siguiente dirección de movimiento para el enemigo.
      * 

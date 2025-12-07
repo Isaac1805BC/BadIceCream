@@ -1,0 +1,62 @@
+/**
+ * BACKUP del método moveEntity - MovementService.java
+ * Fecha: 2025-12-06T18:19:31-05:00
+ * 
+ * Este es el código original antes de tus cambios.
+ * Puedes restaurarlo si es necesario.
+ */
+
+    /**
+     * Mueve una entidad en la dirección especificada si es válido.
+     * 
+     * @return true si el movimiento fue exitoso, false si fue bloqueado
+     */
+    public boolean moveEntity(Movable entity, Direction direction, GameMap map) {
+        Position currentPosition = entity.getPosition();
+        Position targetPosition = currentPosition.move(direction);
+
+        // Validar que la posición esté dentro del mapa
+        if (!map.isValidPosition(targetPosition)) {
+            return false;
+        }
+
+        // Verificar colisiones
+        // Si es un enemigo, permitimos que se mueva a la posición del jugador para
+        // "matarlo"
+        if (entity instanceof Enemy) {
+            boolean blockedByNonPlayer = map.getEntities().stream()
+                    .filter(e -> e.isActive() && e instanceof Collidable)
+                    .map(e -> (Collidable) e)
+                    .filter(Collidable::isSolid)
+                    .filter(e -> !(e instanceof Player)) // Ignorar al jugador
+                    .anyMatch(e -> e.getCollisionPosition().equals(targetPosition));
+
+            if (blockedByNonPlayer) {
+                return false;
+            }
+        } else {
+            // Comportamiento normal para otras entidades (incluido jugador)
+            if (collisionDetector.willCollideWithSolid(targetPosition, map)) {
+                // Si la entidad es el jugador, verificar si lo que bloquea es un enemigo
+                if (entity instanceof Player) {
+                    boolean blockedByNonEnemy = map.getEntities().stream()
+                            .filter(e -> e.isActive() && e instanceof Collidable)
+                            .map(e -> (Collidable) e)
+                            .filter(Collidable::isSolid)
+                            .filter(e -> !(e instanceof Enemy)) // Ignorar enemigos (permitir colisión para morir)
+                            .anyMatch(e -> e.getCollisionPosition().equals(targetPosition));
+                    
+                    if (blockedByNonEnemy) {
+                        return false;
+                    }
+                    // Si solo bloquea un enemigo, permitimos el movimiento para que ocurra la colisión
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        // Ejecutar el movimiento
+        entity.move(direction);
+        return true;
+    }

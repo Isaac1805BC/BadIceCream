@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dc730791-40a9-4a88-88ee-663eb469aafb" name="Changes" comment="" />
+    <list default="true" id="dc730791-40a9-4a88-88ee-663eb469aafb" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/bin/com/badice/domain/entities/CactusFruitTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/badice/domain/entities/CactusFruitTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/badice/domain/entities/PlayerTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/badice/domain/entities/PlayerTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/badice/domain/entities/PositionTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/badice/domain/entities/PositionTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/badice/domain/entities/SquidTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/badice/domain/entities/SquidTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/badice/domain/services/CollisionDetectorTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/badice/domain/services/CollisionDetectorTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/badice/domain/services/IceManagerTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/badice/domain/services/IceManagerTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/badice/domain/services/MovementServiceTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/badice/domain/services/MovementServiceTest.class" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -13,9 +21,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 5
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="365YXOSNQ3H4x49Ac3I5aRFrbId" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -23,12 +31,13 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Batch.run.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/isaac/Desktop/BadIceCream1",
+    "last_opened_file_path": "C:/Users/isaac/Desktop/BadIceCream",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -53,6 +62,7 @@
       <option name="presentableId" value="Default" />
       <updated>1764297937436</updated>
       <workItem from="1764297938544" duration="683000" />
+      <workItem from="1764807512194" duration="1485000" />
     </task>
     <servers />
   </component>
