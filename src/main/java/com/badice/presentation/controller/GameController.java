@@ -5,6 +5,11 @@ import com.badice.domain.enums.GameMode;
 import com.badice.domain.services.GameEngine;
 import com.badice.domain.states.MenuState;
 import com.badice.domain.states.PlayingState;
+import com.badice.domain.enums.BotProfile;
+import com.badice.domain.interfaces.BotStrategy;
+import com.badice.domain.services.strategies.ExpertStrategy;
+import com.badice.domain.services.strategies.FearfulStrategy;
+import com.badice.domain.services.strategies.HungryStrategy;
 import com.badice.presentation.view.*;
 
 import javax.swing.*;
@@ -21,6 +26,7 @@ public class GameController {
     private final GameModeSelectionPanel gameModeSelectionPanel;
     private final LevelSelectionPanel levelSelectionPanel;
     private final PlayerColorSelectionPanel playerColorSelectionPanel;
+    private final BotProfileSelectionPanel botProfileSelectionPanel;
     private final VictoryPanel victoryPanel;
 
     // Variables para el flujo de selección de color
@@ -49,6 +55,8 @@ public class GameController {
         this.gameModeSelectionPanel = new GameModeSelectionPanel();
         this.levelSelectionPanel = new LevelSelectionPanel();
         this.playerColorSelectionPanel = new PlayerColorSelectionPanel();
+        // Inicializar con modo por defecto, se actualizará al mostrar
+        this.botProfileSelectionPanel = new BotProfileSelectionPanel(GameMode.PVM); 
         this.victoryPanel = new VictoryPanel();
         this.mainFrame = new MainFrame();
 
@@ -88,6 +96,10 @@ public class GameController {
         playerColorSelectionPanel.setBrownButtonListener(e -> handleColorSelection("brown"));
         playerColorSelectionPanel.setBlueButtonListener(e -> handleColorSelection("blue"));
         playerColorSelectionPanel.setBackButtonListener(e -> showGameModeSelection());
+
+        // Bot profile selection panel listeners
+        botProfileSelectionPanel.setNextButtonListener(e -> handleBotProfileSelection());
+        botProfileSelectionPanel.setBackButtonListener(e -> showGameModeSelection());
 
         // Victory panel listeners
         victoryPanel.setNextLevelButtonListener(e -> {
@@ -150,20 +162,59 @@ public class GameController {
     private void handleGameModeSelection(GameMode mode) {
         selectedGameMode = mode;
 
-        // MvM: Colores fijos (rojo y caf\u00e9), iniciar directamente
-        if (mode == GameMode.MVM) {
+        if (mode == GameMode.PVM || mode == GameMode.MVM) {
+            // Mostrar selección de bots primero
+            // Recrear panel con el modo correcto para mostrar los combos adecuados
+            mainFrame.remove(botProfileSelectionPanel);
+            BotProfileSelectionPanel newPanel = new BotProfileSelectionPanel(mode);
+            newPanel.setNextButtonListener(e -> handleBotProfileSelection(newPanel));
+            newPanel.setBackButtonListener(e -> showGameModeSelection());
+            mainFrame.showPanel(newPanel);
+        } else {
+            // 1 Player o PvP: Directo a selección de color
+            player1Color = null;
+            player2Color = null;
+            playerColorSelectionPanel.setPlayerNumber("1");
+            playerColorSelectionPanel.setDisabledColor(null);
+            mainFrame.showPanel(playerColorSelectionPanel);
+        }
+    }
+
+    private void handleBotProfileSelection(BotProfileSelectionPanel panel) {
+        // Configurar estrategias en el engine
+        BotProfile p1Profile = panel.getBot1Profile();
+        BotProfile p2Profile = panel.getBot2Profile();
+        
+        gameEngine.setBot1Strategy(createStrategyFromProfile(p1Profile));
+        gameEngine.setBot2Strategy(createStrategyFromProfile(p2Profile));
+        
+        if (selectedGameMode == GameMode.MVM) {
+            // MvM: Colores fijos, iniciar directo
             player1Color = "red";
             player2Color = "brown";
             startNewGameWithColors();
-        }
-        // 1 Player, PvP o PvM: Mostrar selecci\u00f3n de color para el jugador 1 (o
-        // \u00fanico jugador)
-        else {
-            player1Color = null; // Reiniciar colores para nueva selecci\u00f3n
+        } else {
+            // PvM: El jugador humano elige color
+            player1Color = null;
             player2Color = null;
             playerColorSelectionPanel.setPlayerNumber("1");
-            playerColorSelectionPanel.setDisabledColor(null); // No hay colores deshabilitados al inicio
+            playerColorSelectionPanel.setDisabledColor(null);
             mainFrame.showPanel(playerColorSelectionPanel);
+        }
+    }
+    
+    // Sobrecarga para mantener compatibilidad si es necesario, aunque usamos la versión con argumento
+    private void handleBotProfileSelection() {
+        // No-op, usamos el listener dinámico
+    }
+
+    private BotStrategy createStrategyFromProfile(BotProfile profile) {
+        System.out.println("Quiubo pues");
+        switch (profile) {
+            case HUNGRY: return new HungryStrategy();
+            case FEARFUL: return new FearfulStrategy();
+            case EXPERT: return new ExpertStrategy();
+            default: return new HungryStrategy();
         }
     }
 

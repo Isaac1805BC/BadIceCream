@@ -8,6 +8,8 @@ import com.badice.domain.states.MenuState;
 import com.badice.domain.factories.EntityFactory;
 import com.badice.domain.states.GameOverState;
 import com.badice.domain.enums.GameMode;
+import com.badice.domain.interfaces.BotStrategy;
+import com.badice.domain.services.strategies.HungryStrategy;
 import java.util.List;
 
 /**
@@ -35,9 +37,12 @@ public class GameEngine {
 
     // Modo de juego
     private GameMode currentMode;
+    private BotStrategy bot1Strategy;
+    private BotStrategy bot2Strategy;
 
     // Control de tiempo
     private long lastUpdateTime;
+    private static final long LEVEL_TIME_LIMIT = 3 * 60 * 1000; // 3 minutos en milisegundos
 
     public GameEngine() {
         // Inicializar servicios
@@ -71,6 +76,12 @@ public class GameEngine {
         stateManager.update();
 
         lastUpdateTime = currentTime;
+
+        // Verificar tiempo límite
+        if (getElapsedTime() >= LEVEL_TIME_LIMIT) {
+            System.out.println("¡TIEMPO AGOTADO! Game Over.");
+            changeState(new GameOverState());
+        }
     }
 
     /**
@@ -704,6 +715,11 @@ public class GameEngine {
         return System.currentTimeMillis() - gameStartTime;
     }
 
+    public long getTimeRemaining() {
+        long elapsed = getElapsedTime();
+        return Math.max(0, LEVEL_TIME_LIMIT - elapsed);
+    }
+
     // Getters
     public GameMap getCurrentMap() {
         return currentMap;
@@ -768,20 +784,34 @@ public class GameEngine {
         if (!player.isActive())
             return;
 
-        // Lógica simple: moverse aleatoriamente o hacia una fruta
-        // Por ahora, movimiento aleatorio simple cada ciertos frames
-        if (Math.random() < 0.05) { // 5% de probabilidad de cambio de dirección por frame
-            Direction[] dirs = Direction.values();
-            Direction randomDir = dirs[(int) (Math.random() * dirs.length)];
-            movePlayer(randomDir, playerIndex);
+        BotStrategy strategy = null;
+        // Asignar estrategia según índice (Bot 1 o Bot 2)
+        // En MvM: P1 es bot1, P2 es bot2
+        // En PvM: P2 es bot1 (el único bot)
+        
+        if (currentMode == GameMode.MVM) {
+            strategy = (playerIndex == 0) ? bot1Strategy : bot2Strategy;
+        } else if (currentMode == GameMode.PVM) {
+            strategy = bot1Strategy; // Solo hay un bot
         }
+        
+        // Si no hay estrategia asignada, usar Hungry por defecto
+        if (strategy == null) {
+            strategy = new HungryStrategy();
+        }
+        
+        // Ejecutar movimiento cada 10 ticks para no ser tan rápido
+        if (tickCounter % 10 == 0) {
+            Direction nextDir = strategy.calculateNextMove(player, currentMap);
+            movePlayer(nextDir, playerIndex);
+        }
+    }
 
-        // Intentar moverse en la dirección actual
-        if (!movePlayer(player.getCurrentDirection(), playerIndex)) {
-            // Si choca, cambiar dirección
-            Direction[] dirs = Direction.values();
-            Direction randomDir = dirs[(int) (Math.random() * dirs.length)];
-            movePlayer(randomDir, playerIndex);
-        }
+    public void setBot1Strategy(BotStrategy strategy) {
+        this.bot1Strategy = strategy;
+    }
+
+    public void setBot2Strategy(BotStrategy strategy) {
+        this.bot2Strategy = strategy;
     }
 }

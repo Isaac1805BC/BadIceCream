@@ -47,6 +47,10 @@ public class Position implements Serializable {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
+    public double distanceTo(Position other) {
+        return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)

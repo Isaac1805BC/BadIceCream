@@ -58,9 +58,12 @@ public class HUDRenderer {
         String fruitsText = scoreService.getFruitsCollected() + "/" + scoreService.getTotalFruits();
         g.drawString(fruitsText, panelWidth / 2 + 50, 25);
 
-        // Tiempo
+        // Tiempo Restante
         g.setColor(Color.CYAN);
-        String timeText = formatTime(elapsedTime);
+        // Calculamos la cuenta regresiva aquí basándonos en el límite conocido.
+        long remaining = Math.max(0, 3 * 60 * 1000 - elapsedTime);
+        
+        String timeText = formatTime(remaining);
         g.drawString(timeText, 10, panelWidth - 100);
     }
 

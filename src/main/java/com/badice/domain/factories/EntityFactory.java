@@ -1,6 +1,7 @@
 package com.badice.domain.factories;
 
 import com.badice.domain.entities.*;
+import com.badice.domain.entities.HotTile;
 import com.badice.domain.interfaces.MovementPattern;
 import com.badice.domain.patterns.*;
 
