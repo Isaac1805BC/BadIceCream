@@ -81,7 +81,8 @@ public class ChaseMovementPattern implements MovementPattern {
         // Verificar si está bloqueado por algo que NO sea un jugador ni hielo
         return !map.getEntities().stream()
                 .filter(e -> e.isActive() && e instanceof com.badice.domain.interfaces.Collidable)
-                .filter(e -> !(e instanceof IceBlock)) // Ignorar hielos (ya los manejamos)
+                .filter(e -> !(e instanceof IceBlock) || !isSquid) // Ignorar hielos SOLO si soy Squid (ya revisé
+                                                                   // arriba)
                 .map(e -> (com.badice.domain.interfaces.Collidable) e)
                 .filter(com.badice.domain.interfaces.Collidable::isSolid)
                 .filter(e -> !(e instanceof Player)) // Ignorar al jugador

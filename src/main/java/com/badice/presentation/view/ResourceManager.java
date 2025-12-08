@@ -80,7 +80,7 @@ public class ResourceManager {
             case "cactus" -> "Cactus.png";
             default -> fruitType + ".png"; // Fallback
         };
-        
+
         return loadImage("sprites/fruits/" + filename);
     }
 
@@ -89,8 +89,8 @@ public class ResourceManager {
      */
     public BufferedImage getBlockSprite(String blockType) {
         if (blockType.equals("wall")) {
-            // Usar el sprite de hielo para las paredes del borde como solicitó el usuario
-            return loadImage("sprites/fruits/iceBlock.png");
+            // Usar BorderMap para los bordes del nivel
+            return loadImage("backgrounds/BorderMap.png");
         }
         return loadImage("sprites/blocks/" + blockType + ".png");
     }

@@ -64,8 +64,31 @@ public class GamePanel extends JPanel {
         // Renderizar fondo/grid
         entityRenderer.renderGrid(g2d, map.getWidth(), map.getHeight());
 
-        // Renderizar todas las entidades
-        for (GameEntity entity : map.getEntities()) {
+        // Renderizar entidades por capas para asegurar visibilidad correcta, frutas al
+        // final
+
+        // 1. Bloques estáticos y paredes (Fondo)
+        for (GameEntity entity : map.getBlocks()) {
+            entityRenderer.renderEntity(g2d, entity);
+        }
+
+        // 2. Bloques de hielo
+        for (GameEntity entity : map.getIceBlocks()) {
+            entityRenderer.renderEntity(g2d, entity);
+        }
+
+        // 3. Enemigos
+        for (GameEntity entity : map.getEnemies()) {
+            entityRenderer.renderEntity(g2d, entity);
+        }
+
+        // 4. Jugadores
+        for (GameEntity entity : map.getPlayers()) {
+            entityRenderer.renderEntity(g2d, entity);
+        }
+
+        // 5. Frutas (Frente - para que se vean siempre)
+        for (GameEntity entity : map.getFruits()) {
             entityRenderer.renderEntity(g2d, entity);
         }
 

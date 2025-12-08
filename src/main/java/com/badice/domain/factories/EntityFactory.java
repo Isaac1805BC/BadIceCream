@@ -118,9 +118,10 @@ public class EntityFactory {
 
     /**
      * Crea el enemigo Troll - Enemigo del nivel 1.
+     * Se mueve en patrón rectangular (cuadrado).
      */
     public static Enemy createTrollEnemy(int x, int y) {
-        return new TrollEnemy(new Position(x, y), new HorizontalMovementPattern());
+        return new TrollEnemy(new Position(x, y), new RectangularMovementPattern());
     }
 
     /**

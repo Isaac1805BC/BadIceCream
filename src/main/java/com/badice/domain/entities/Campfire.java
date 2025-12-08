@@ -59,9 +59,6 @@ public class Campfire extends Block {
 
     @Override
     public boolean isSolid() {
-        // La fogata NO bloquea el movimiento
-        // Jugadores y enemigos pueden pasar sobre ella
-        // Pero los jugadores mueren al contacto (manejado en CollisionDetector)
         return false;
     }
 

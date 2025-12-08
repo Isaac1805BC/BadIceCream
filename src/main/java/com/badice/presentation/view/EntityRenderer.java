@@ -65,14 +65,38 @@ public class EntityRenderer {
 
         // Determinar qué sprite cargar basado en el tipo de enemigo
         if (enemy instanceof TrollEnemy) {
-            sprite = resourceManager.loadImage("sprites/enemies/troll.png");
+            // Sprites direccionales para el Troll
+            Direction dir = enemy.getCurrentDirection();
+            sprite = switch (dir) {
+                case RIGHT -> resourceManager.loadImage("sprites/enemies/TrollCaminandoDerecha.png");
+                case LEFT -> resourceManager.loadImage("sprites/enemies/TrollCaminandoIzquierda.png");
+                case UP -> resourceManager.loadImage("sprites/enemies/TrollCaminandoHaciaArriba.png");
+                case DOWN -> resourceManager.loadImage("sprites/enemies/TrollCaminandoDerecha.png");
+                default -> resourceManager.loadImage("sprites/enemies/troll.png");
+            };
         } else if (enemy instanceof PotEnemy) {
             sprite = resourceManager.loadImage("sprites/enemies/maseta.png");
         } else if (enemy instanceof SquidEnemy) {
-            sprite = resourceManager.loadImage("sprites/enemies/calamar.png");
+            // Sprites direccionales para el Calamar
+            SquidEnemy squid = (SquidEnemy) enemy;
+
+            // Si está rompiendo hielo, mostrar sprite especial
+            if (squid.isBreakingIce()) {
+                sprite = resourceManager.loadImage("sprites/enemies/CalamarRompiendoBloques.png");
+            } else {
+                // Sprites direccionales normales
+                Direction dir = enemy.getCurrentDirection();
+                sprite = switch (dir) {
+                    case RIGHT -> resourceManager.loadImage("sprites/enemies/CalamarDerecha.png");
+                    case LEFT -> resourceManager.loadImage("sprites/enemies/CalamarIzquierda.png");
+                    case UP -> resourceManager.loadImage("sprites/enemies/CalamarCaminandoHaciaArriba.png");
+                    case DOWN -> resourceManager.loadImage("sprites/enemies/CalamarDerecha.png");
+                    default -> resourceManager.loadImage("sprites/enemies/calamar.png");
+                };
+            }
         } else if (enemy instanceof NarvalEnemy) {
-            // NUEVO: Sprite para Narval
-            sprite = resourceManager.loadImage("sprites/enemies/Narval.png");
+            // Sprite HD para Narval
+            sprite = resourceManager.loadImage("sprites/enemies/NarvalHD.png");
         }
 
         if (sprite != null) {
@@ -170,16 +194,33 @@ public class EntityRenderer {
     }
 
     private void renderIceBlock(Graphics2D g, IceBlock ice, int x, int y) {
-        int padding = 2;
-        g.setColor(new Color(135, 206, 235, 200)); // Sky blue con transparencia
-        g.fillRect(x + padding, y + padding, cellSize - (padding * 2), cellSize - (padding * 2));
-        g.setColor(new Color(173, 216, 230));
-        g.drawRect(x + padding, y + padding, cellSize - (padding * 2) - 1, cellSize - (padding * 2) - 1);
+        // Cargar imagen según el estado del bloque
+        BufferedImage sprite = null;
 
-        // Efecto de hielo
-        g.setColor(new Color(255, 255, 255, 150));
-        g.drawLine(x + padding + 2, y + padding + 2, x + cellSize - padding - 3, y + padding + 2);
-        g.drawLine(x + padding + 2, y + padding + 2, x + padding + 2, y + cellSize - padding - 3);
+        switch (ice.getState()) {
+            case INTACT:
+                sprite = resourceManager.loadImage("backgrounds/IceBlock1.png");
+                break;
+            case CRACKED:
+                sprite = resourceManager.loadImage("backgrounds/MedianamenteRoto.png");
+                break;
+            case BROKEN:
+                sprite = resourceManager.loadImage("backgrounds/CompletamenteRoto.png");
+                break;
+        }
+
+        if (sprite != null) {
+            // Escalar sprite al tamaño de la celda
+            Image scaledSprite = sprite.getScaledInstance(cellSize, cellSize, Image.SCALE_SMOOTH);
+            g.drawImage(scaledSprite, x, y, null);
+        } else {
+            // Fallback si no carga la imagen
+            int padding = 2;
+            g.setColor(new Color(135, 206, 235, 200)); // Sky blue con transparencia
+            g.fillRect(x + padding, y + padding, cellSize - (padding * 2), cellSize - (padding * 2));
+            g.setColor(new Color(173, 216, 230));
+            g.drawRect(x + padding, y + padding, cellSize - (padding * 2) - 1, cellSize - (padding * 2) - 1);
+        }
     }
 
     private void renderBlock(Graphics2D g, Block block, int x, int y) {
@@ -187,8 +228,12 @@ public class EntityRenderer {
 
         // Determinar qué sprite cargar basado en el tipo de bloque
         if (block instanceof Campfire) {
-            // NUEVO: Sprite para Fogata
-            sprite = resourceManager.loadImage("sprites/obstacles/Fogata.png");
+            Campfire campfire = (Campfire) block;
+            if (campfire.isLit()) {
+                sprite = resourceManager.loadImage("sprites/obstacles/campfireON.png");
+            } else {
+                sprite = resourceManager.loadImage("sprites/obstacles/campfireOF.png");
+            }
         } else if (block instanceof HotTile) {
             // NUEVO: Sprite para Baldosa Caliente
             sprite = resourceManager.loadImage("sprites/obstacles/Baldosa_caliente.png");

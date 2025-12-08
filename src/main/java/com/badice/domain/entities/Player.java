@@ -80,6 +80,13 @@ public class Player extends GameEntity implements Movable, Collidable {
         return currentDirection;
     }
 
+    /**
+     * Actualiza la dirección en la que mira el jugador sin moverlo.
+     */
+    public void setDirection(Direction direction) {
+        this.currentDirection = direction;
+    }
+
     public String getPlayerColor() {
         return playerColor;
     }

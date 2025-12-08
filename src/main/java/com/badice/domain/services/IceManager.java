@@ -42,7 +42,7 @@ public class IceManager {
             // Crear el bloque de hielo (incluso sobre fogatas)
             if (!hasIceBlockAt(currentPos, map)) {
                 IceBlock iceBlock = new IceBlock(currentPos);
-                map.addIceBlock(currentPos);
+                map.addEntity(iceBlock); // Agregar directamente como entidad
                 lastCreated = iceBlock;
             }
 
@@ -55,31 +55,29 @@ public class IceManager {
 
     /**
      * Destruye una fila de bloques de hielo en la dirección especificada.
-     * Destruye bloques contiguos hasta encontrar un espacio vacío o un obstáculo.
+     * Los bloques se agrietan en cascada (efecto dominó) antes de destruirse.
      * 
-     * @return true si se destruyó al menos un bloque, false si no
+     * @return true si se agrietó al menos un bloque, false si no
      */
     public boolean destroyIceBlock(Position startPosition, Direction direction, GameMap map) {
         Position currentPos = startPosition.move(direction);
-        boolean destroyedAny = false;
+        boolean crackedAny = false;
 
         while (map.isValidPosition(currentPos)) {
             IceBlock iceBlock = getIceBlockAt(currentPos, map);
 
             if (iceBlock != null) {
-                iceBlock.destroy();
-                map.removeEntity(iceBlock);
-                destroyedAny = true;
+                // Agrietar el bloque (inicia animación de ruptura)
+                iceBlock.crack();
+                crackedAny = true;
 
-                // NUEVO: Verificar si hay una fogata en esta posición y apagarla
+                // Verificar si hay una fogata en esta posición y apagarla
                 Campfire campfire = getCampfireAt(currentPos, map);
                 if (campfire != null && campfire.isLit()) {
                     campfire.extinguish();
-                    System.out.println("Campfire extinguished by destroying ice at " + currentPos);
                 }
             } else {
-                // Si encontramos un espacio sin hielo (vacío o con otra entidad), dejamos de
-                // destruir
+                // Si encontramos un espacio sin hielo, dejamos de destruir
                 break;
             }
 
@@ -87,7 +85,7 @@ public class IceManager {
             currentPos = currentPos.move(direction);
         }
 
-        return destroyedAny;
+        return crackedAny;
     }
 
     /**

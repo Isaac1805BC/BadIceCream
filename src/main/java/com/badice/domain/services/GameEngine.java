@@ -173,26 +173,9 @@ public class GameEngine {
         List<Player> players = currentMap.getPlayers();
         for (Player player : players) {
             if (player != null && player.isActive()) {
-                List<GameEntity> collisions = collisionDetector.detectPlayerCollisions(player, currentMap);
-
-                for (GameEntity entity : collisions) {
-                    if (entity instanceof Fruit) {
-                        Fruit fruit = (Fruit) entity;
-
-                        // Verificar si es un cactus peligroso
-                        if (fruit instanceof CactusFruit && ((CactusFruit) fruit).isDangerous()) {
-                            handlePlayerDeath(player);
-                            break;
-                        }
-
-                        if (!fruit.isCollected()) {
-                            fruit.collect();
-                            scoreService.addFruitScore(fruit.getPoints());
-                        }
-                    } else if (entity instanceof Enemy) {
-                        handlePlayerDeath(player);
-                        break; // Solo morir una vez por frame
-                    }
+                if (player != null && player.isActive()) {
+                    // Usar el método centralizado que maneja frutas, enemigos Y FOGATAS
+                    collisionDetector.handlePlayerCollisions(player, currentMap, scoreService);
                 }
             }
         }
@@ -265,6 +248,10 @@ public class GameEngine {
         if (!player.isActive())
             return false;
 
+        // IMPORTANTE: Actualizar dirección SIEMPRE, incluso si el movimiento falla
+        player.setDirection(direction);
+
+        // Intentar mover (puede fallar si está bloqueado)
         return movementService.moveEntity(player, direction, currentMap);
     }
 
@@ -338,11 +325,11 @@ public class GameEngine {
             currentMap.addEntity(EntityFactory.createWall(14, y));
         }
 
-        // Añadir obstáculos internos
-        currentMap.addEntity(EntityFactory.createWall(3, 3));
-        currentMap.addEntity(EntityFactory.createWall(5, 5));
-        currentMap.addEntity(EntityFactory.createWall(9, 5));
-        currentMap.addEntity(EntityFactory.createWall(11, 3));
+        // Añadir obstáculos internos (Hielo destructible)
+        currentMap.addEntity(EntityFactory.createIceBlock(3, 3));
+        currentMap.addEntity(EntityFactory.createIceBlock(5, 5));
+        currentMap.addEntity(EntityFactory.createIceBlock(9, 5));
+        currentMap.addEntity(EntityFactory.createIceBlock(11, 3));
 
         // Configurar fases y frutas según nivel
         if (levelNumber == 1) {
@@ -675,6 +662,25 @@ public class GameEngine {
         scoreService.resetCurrentScore();
         scoreService.addScore(state.getScore());
         scoreService.setCurrentLevel(state.getCurrentLevel());
+
+        // IMPORTANTE: Recontar frutas del mapa cargado
+        if (currentMap != null) {
+            int totalFruits = 0;
+            int collectedFruits = 0;
+
+            for (com.badice.domain.entities.GameEntity entity : currentMap.getEntities()) {
+                if (entity instanceof com.badice.domain.entities.Fruit) {
+                    totalFruits++;
+                    com.badice.domain.entities.Fruit fruit = (com.badice.domain.entities.Fruit) entity;
+                    if (fruit.isCollected()) {
+                        collectedFruits++;
+                    }
+                }
+            }
+
+            scoreService.setTotalFruits(totalFruits);
+            scoreService.setFruitsCollected(collectedFruits);
+        }
 
         // Restaurar tiempo
         // Ajustamos el tiempo de inicio para que coincida con el tiempo guardado

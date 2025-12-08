@@ -10,12 +10,23 @@ import com.badice.domain.interfaces.Destructible;
 public class IceBlock extends GameEntity implements Collidable, Destructible {
     private static final String ENTITY_TYPE = "ICE_BLOCK";
     private static final int DEFAULT_HEALTH = 1;
+    private static final long CRACK_DELAY = 300; // 300ms entre estados de ruptura
+
+    public enum IceState {
+        INTACT,
+        CRACKED,
+        BROKEN
+    }
 
     private int health;
+    private IceState state;
+    private long crackTime; // Momento en que se agrietó
 
     public IceBlock(Position position) {
         super(position);
         this.health = DEFAULT_HEALTH;
+        this.state = IceState.INTACT;
+        this.crackTime = 0;
     }
 
     @Override
@@ -64,7 +75,36 @@ public class IceBlock extends GameEntity implements Collidable, Destructible {
 
     @Override
     protected void doUpdate() {
-        // Los bloques de hielo son estáticos
+        // Verificar transición de estados
+        if (state == IceState.CRACKED && crackTime > 0) {
+            long elapsed = System.currentTimeMillis() - crackTime;
+            if (elapsed >= CRACK_DELAY) {
+                state = IceState.BROKEN;
+                crackTime = System.currentTimeMillis();
+            }
+        } else if (state == IceState.BROKEN && crackTime > 0) {
+            long elapsed = System.currentTimeMillis() - crackTime;
+            if (elapsed >= CRACK_DELAY) {
+                destroy();
+            }
+        }
+    }
+
+    /**
+     * Inicia el proceso de agrietamiento del hielo.
+     */
+    public void crack() {
+        if (state == IceState.INTACT) {
+            state = IceState.CRACKED;
+            crackTime = System.currentTimeMillis();
+        }
+    }
+
+    /**
+     * Obtiene el estado actual del bloque de hielo.
+     */
+    public IceState getState() {
+        return state;
     }
 
     @Override
