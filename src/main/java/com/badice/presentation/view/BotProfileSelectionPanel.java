@@ -105,7 +105,7 @@ public class BotProfileSelectionPanel extends JPanel {
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Arial", Font.BOLD, 24));
-        label.setForeground(Color.WHITE);
+        label.setForeground(Color.BLACK);
         // Sombra negra
         label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
         return label;

@@ -15,7 +15,6 @@ public class PausedState implements GameState {
 
     @Override
     public void onEnter(GameEngine engine) {
-        System.out.println("Juego pausado...");
         engine.pauseGameTimer();
     }
 
@@ -26,7 +25,6 @@ public class PausedState implements GameState {
 
     @Override
     public void onExit(GameEngine engine) {
-        System.out.println("Reanudando juego...");
         engine.resumeGameTimer();
     }
 

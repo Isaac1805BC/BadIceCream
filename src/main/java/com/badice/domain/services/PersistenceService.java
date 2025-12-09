@@ -21,7 +21,6 @@ public class PersistenceService {
     public void saveGame(GameSaveData state) throws IOException {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(SAVE_FILE_NAME))) {
             oos.writeObject(state);
-            System.out.println("Game saved successfully to " + SAVE_FILE_NAME);
         }
     }
 
@@ -35,7 +34,6 @@ public class PersistenceService {
     public GameSaveData loadGame() throws IOException, ClassNotFoundException {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(SAVE_FILE_NAME))) {
             GameSaveData state = (GameSaveData) ois.readObject();
-            System.out.println("Game loaded successfully from " + SAVE_FILE_NAME);
             return state;
         }
     }

@@ -64,7 +64,14 @@ public class HUDRenderer {
         long remaining = Math.max(0, 3 * 60 * 1000 - elapsedTime);
         
         String timeText = formatTime(remaining);
-        g.drawString(timeText, 10, panelWidth - 100);
+        // Centrado arriba
+        renderCenteredMessage(g, timeText, panelWidth / 2 - 100, 50); // Usamos un Y offset pequeño para que esté arriba
+        // Pero renderCenteredMessage pone en el medio de la pantalla height/2.
+        // Mejor dibujarlo manualmente.
+        
+        FontMetrics metrics = g.getFontMetrics();
+        //int timeX = (panelWidth - metrics.stringWidth(timeText)) / 2;
+        //g.drawString(timeText, timeX, 35);
     }
 
     private void drawHeart(Graphics2D g, int x, int y) {

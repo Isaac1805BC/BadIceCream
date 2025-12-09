@@ -21,7 +21,6 @@ public class LevelCompleteState implements GameState {
 
     @Override
     public void onExit(GameEngine engine) {
-        System.out.println("Cargando siguiente nivel...");
     }
 
     @Override

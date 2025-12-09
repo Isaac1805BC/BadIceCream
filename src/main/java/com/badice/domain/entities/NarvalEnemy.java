@@ -75,7 +75,6 @@ public class NarvalEnemy extends Enemy {
             this.isCharging = true;
             this.chargeCounter = 0;
             setSpeed(CHARGE_SPEED);
-            System.out.println("Narval charging in direction: " + chargeDirection);
         }
     }
 
@@ -87,7 +86,6 @@ public class NarvalEnemy extends Enemy {
         this.chargeDirection = null;
         this.chargeCounter = 0;
         setSpeed(NORMAL_SPEED);
-        System.out.println("Narval stopped charging");
     }
 
     /**

@@ -19,11 +19,9 @@ public class PlayingState implements GameState {
         // Actualizar todas las entidades
         engine.updateEntities();
 
-        // Verificar condiciones de victoria/derrota
+        // Verificar condiciones de victoria
         if (engine.checkVictoryCondition()) {
             engine.changeState(new LevelCompleteState());
-        } else if (engine.checkDefeatCondition()) {
-            engine.changeState(new GameOverState());
         }
     }
 

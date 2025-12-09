@@ -209,7 +209,6 @@ public class GameController {
     }
 
     private BotStrategy createStrategyFromProfile(BotProfile profile) {
-        System.out.println("Quiubo pues");
         switch (profile) {
             case HUNGRY: return new HungryStrategy();
             case FEARFUL: return new FearfulStrategy();

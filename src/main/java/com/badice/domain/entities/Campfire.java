@@ -37,7 +37,6 @@ public class Campfire extends Block {
         if (isLit) {
             this.isLit = false;
             this.extinguishedTime = System.currentTimeMillis();
-            System.out.println("Campfire extinguished at " + position);
         }
     }
 
@@ -47,7 +46,6 @@ public class Campfire extends Block {
     private void relight() {
         this.isLit = true;
         this.extinguishedTime = 0;
-        System.out.println("Campfire relit at " + position);
     }
 
     /**
@@ -67,7 +65,6 @@ public class Campfire extends Block {
         // Solo daña jugadores cuando está encendida
         if (isLit && other instanceof Player) {
             // La lógica de eliminación del jugador se maneja en CollisionDetector
-            System.out.println("Player touched lit campfire!");
         }
         // NO daña enemigos
     }

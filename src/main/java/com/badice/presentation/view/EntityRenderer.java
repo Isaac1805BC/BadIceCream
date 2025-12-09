@@ -48,15 +48,12 @@ public class EntityRenderer {
         String direction = player.getCurrentDirection().toString().toLowerCase();
         BufferedImage sprite = resourceManager.getPlayerSprite(color, direction);
 
-        if (sprite == null) {
+        if (!drawSprite(g, sprite, x, y)) {
             // No hay sprite, usar figura de color
             g.setColor(Color.CYAN);
             g.fillOval(x + 2, y + 2, cellSize - 4, cellSize - 4);
             g.setColor(Color.BLUE);
             g.drawOval(x + 2, y + 2, cellSize - 4, cellSize - 4);
-        } else {
-            // Hay sprite, dibujarlo
-            g.drawImage(sprite, x, y, cellSize, cellSize, null);
         }
     }
 
@@ -99,11 +96,7 @@ public class EntityRenderer {
             sprite = resourceManager.loadImage("sprites/enemies/NarvalHD.png");
         }
 
-        if (sprite != null) {
-            // Escalar sprite al tamaño de la celda
-            Image scaledSprite = sprite.getScaledInstance(cellSize, cellSize, Image.SCALE_SMOOTH);
-            g.drawImage(scaledSprite, x, y, null);
-        } else {
+        if (!drawSprite(g, sprite, x, y)) {
             // Fallback: renderizado básico
             if (enemy instanceof TrollEnemy) {
                 g.setColor(new Color(139, 69, 19)); // Marrón para Troll
@@ -148,9 +141,7 @@ public class EntityRenderer {
 
         BufferedImage sprite = resourceManager.getFruitSprite(fruit.getFruitType());
 
-        if (sprite != null) {
-            g.drawImage(sprite, x, y, cellSize, cellSize, null);
-        } else {
+        if (!drawSprite(g, sprite, x, y)) {
             // Fallback: Colores según tipo de fruta
             Color mainColor, borderColor;
             String type = fruit.getFruitType().toLowerCase();
@@ -209,11 +200,7 @@ public class EntityRenderer {
                 break;
         }
 
-        if (sprite != null) {
-            // Escalar sprite al tamaño de la celda
-            Image scaledSprite = sprite.getScaledInstance(cellSize, cellSize, Image.SCALE_SMOOTH);
-            g.drawImage(scaledSprite, x, y, null);
-        } else {
+        if (!drawSprite(g, sprite, x, y)) {
             // Fallback si no carga la imagen
             int padding = 2;
             g.setColor(new Color(135, 206, 235, 200)); // Sky blue con transparencia
@@ -242,11 +229,7 @@ public class EntityRenderer {
             sprite = resourceManager.getBlockSprite(block.getBlockType());
         }
 
-        if (sprite != null) {
-            // Escalar sprite al tamaño de la celda
-            Image scaledSprite = sprite.getScaledInstance(cellSize, cellSize, Image.SCALE_SMOOTH);
-            g.drawImage(scaledSprite, x, y, null);
-        } else {
+        if (!drawSprite(g, sprite, x, y)) {
             // Fallback: renderizado básico según el tipo
             if (block instanceof Campfire) {
                 Campfire campfire = (Campfire) block;
@@ -283,5 +266,13 @@ public class EntityRenderer {
         for (int y = 0; y <= height; y++) {
             g.drawLine(0, y * cellSize, width * cellSize, y * cellSize);
         }
+    }
+
+    private boolean drawSprite(Graphics2D g, BufferedImage sprite, int x, int y) {
+        if (sprite != null) {
+            g.drawImage(sprite, x, y, cellSize, cellSize, null);
+            return true;
+        }
+        return false;
     }
 }

@@ -20,7 +20,6 @@ public class CactusFruit extends Fruit {
         if (currentTime - lastStateChangeTime >= STATE_CHANGE_INTERVAL) {
             isDangerous = !isDangerous;
             lastStateChangeTime = currentTime;
-            System.out.println("Cactus state changed. Dangerous: " + isDangerous);
         }
     }
 

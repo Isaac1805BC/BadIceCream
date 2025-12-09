@@ -73,7 +73,6 @@ public class ChaseMovementPattern implements MovementPattern {
                 // Romper el hielo
                 SquidEnemy squid = (SquidEnemy) enemy;
                 squid.breakIceAt(nextPos, map);
-                System.out.println("¡Calamar rompió hielo en " + nextPos + " persiguiendo al jugador!");
                 return true; // Ahora puede moverse a esa posición
             }
         }

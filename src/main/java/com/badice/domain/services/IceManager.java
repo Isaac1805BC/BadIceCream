@@ -33,7 +33,6 @@ public class IceManager {
             // Verificar si hay una baldosa caliente en esta posición
             // Si la hay, el hielo se derrite instantáneamente (no se crea)
             if (hasHotTileAt(currentPos, map)) {
-                System.out.println("Ice melted instantly on hot tile at " + currentPos);
                 // No crear hielo, pero continuar la línea
                 currentPos = currentPos.move(direction);
                 continue;

@@ -25,9 +25,17 @@ public class HungryStrategy implements BotStrategy {
         }
         
         if (nearestFruit == null) {
-            return Direction.values()[(int)(Math.random() * 4)]; // Random si no hay frutas
+            return Direction.values()[(int)(Math.random() * 4)];
         }
         
+        // Usar BFS para encontrar el camino
+        com.badice.domain.entities.Direction nextDir = com.badice.domain.services.PathFinder.getNextStep(botPos, nearestFruit, map);
+        
+        if (nextDir != null) {
+            return nextDir;
+        }
+        
+        // Fallback si no encuentra camino
         return getDirectionTowards(botPos, nearestFruit);
     }
     

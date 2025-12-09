@@ -25,22 +25,29 @@ public class FearfulStrategy implements BotStrategy {
         }
         
         if (nearestEnemy == null) {
-            return Direction.values()[(int)(Math.random() * 4)]; // Random si no hay enemigos
+            return Direction.values()[(int)(Math.random() * 4)];
         }
         
-        // Moverse en dirección opuesta
-        return getDirectionAwayFrom(botPos, nearestEnemy);
+        // Lógica mejorada: Moverse a la posición adyacente que maximice la distancia al enemigo
+        Direction bestDir = null;
+        double maxDist = -1;
+        
+        for (Direction dir : Direction.values()) {
+            Position nextPos = botPos.move(dir);
+            // Verificar si es movida válida (básico)
+            if (!com.badice.domain.services.PathFinder.isValidMove(nextPos, map) || com.badice.domain.services.PathFinder.isBlocked(nextPos, map)) {
+                continue;
+            }
+            
+            double dist = nextPos.distanceTo(nearestEnemy);
+            if (dist > maxDist) {
+                maxDist = dist;
+                bestDir = dir;
+            }
+        }
+        
+        return bestDir != null ? bestDir : Direction.values()[(int)(Math.random() * 4)];
     }
     
-    private Direction getDirectionAwayFrom(Position from, Position to) {
-        int dx = to.getX() - from.getX();
-        int dy = to.getY() - from.getY();
-        
-        // Invertir lógica para huir
-        if (Math.abs(dx) > Math.abs(dy)) {
-            return dx > 0 ? Direction.LEFT : Direction.RIGHT;
-        } else {
-            return dy > 0 ? Direction.UP : Direction.DOWN;
-        }
-    }
+
 }

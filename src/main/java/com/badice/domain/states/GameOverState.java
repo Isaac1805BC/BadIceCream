@@ -10,7 +10,6 @@ public class GameOverState implements GameState {
 
     @Override
     public void onEnter(GameEngine engine) {
-        System.out.println("Game Over!");
         engine.pauseGameTimer();
     }
 
@@ -21,7 +20,6 @@ public class GameOverState implements GameState {
 
     @Override
     public void onExit(GameEngine engine) {
-        System.out.println("Saliendo del game over...");
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.badice.domain.states.GameState;
 import com.badice.domain.states.MenuState;
 import com.badice.domain.factories.EntityFactory;
 import com.badice.domain.states.GameOverState;
+import com.badice.domain.states.LevelCompleteState;
 import com.badice.domain.enums.GameMode;
 import com.badice.domain.interfaces.BotStrategy;
 import com.badice.domain.services.strategies.HungryStrategy;
@@ -41,8 +42,10 @@ public class GameEngine {
     private BotStrategy bot2Strategy;
 
     // Control de tiempo
-    private long lastUpdateTime;
     private static final long LEVEL_TIME_LIMIT = 3 * 60 * 1000; // 3 minutos en milisegundos
+
+    // Contador de ticks para actualizaciones no críticas
+    private int tickCounter = 0;
 
     public GameEngine() {
         // Inicializar servicios
@@ -55,9 +58,6 @@ public class GameEngine {
         // Inicializar estado
         this.isPaused = false;
         this.currentLevelNumber = 1;
-        this.lastUpdateTime = System.currentTimeMillis();
-        this.currentPhase = 1;
-        this.lastUpdateTime = System.currentTimeMillis();
         this.currentPhase = 1;
         this.totalPhases = 1;
         this.currentMode = GameMode.ONE_PLAYER;
@@ -70,12 +70,8 @@ public class GameEngine {
      * Bucle principal de actualización del juego.
      */
     public void update() {
-        long currentTime = System.currentTimeMillis();
-
         // Actualizar el estado actual
         stateManager.update();
-
-        lastUpdateTime = currentTime;
 
         // Verificar tiempo límite
         if (getElapsedTime() >= LEVEL_TIME_LIMIT) {
@@ -83,11 +79,6 @@ public class GameEngine {
             changeState(new GameOverState());
         }
     }
-
-    /**
-     * Actualiza todas las entidades del mapa.
-     */
-    private int tickCounter = 0;
 
     /**
      * Actualiza todas las entidades del mapa.
@@ -111,8 +102,6 @@ public class GameEngine {
                 if (pattern != null) {
                     Direction nextDirection = pattern.calculateNextDirection(enemy, currentMap);
 
-                    boolean moved = false;
-
                     // NUEVO: Lógica especial para el Narval (NarvalEnemy)
                     if (enemy instanceof NarvalEnemy) {
                         NarvalEnemy narval = (NarvalEnemy) enemy;
@@ -135,15 +124,14 @@ public class GameEngine {
                                 if (iceBlock != null) {
                                     iceBlock.destroy();
                                     currentMap.removeEntity(iceBlock);
-                                    System.out.println("Narval broke ice at " + nextPos);
                                 }
                             }
 
                             // Moverse en dirección de embestida
-                            moved = movementService.moveEntity(narval, narval.getChargeDirection(), currentMap);
+                            movementService.moveEntity(narval, narval.getChargeDirection(), currentMap);
                         } else {
                             // Movimiento normal - usar patrón de movimiento
-                            moved = movementService.moveEntity(narval, nextDirection, currentMap);
+                            movementService.moveEntity(narval, nextDirection, currentMap);
                         }
                     }
                     // Lógica especial para el Calamar (SquidEnemy)
@@ -156,15 +144,14 @@ public class GameEngine {
                             if (iceBlock != null) {
                                 iceBlock.destroy();
                                 currentMap.removeEntity(iceBlock);
-                                System.out.println("Squid broke ice at " + nextPos);
                             }
                         }
 
                         // Intentar mover después de romper hielo
-                        moved = movementService.moveEntity(enemy, nextDirection, currentMap);
+                        movementService.moveEntity(enemy, nextDirection, currentMap);
                     } else {
                         // Enemigos normales
-                        moved = movementService.moveEntity(enemy, nextDirection, currentMap);
+                        movementService.moveEntity(enemy, nextDirection, currentMap);
                     }
                 }
             }
@@ -196,6 +183,9 @@ public class GameEngine {
 
         {
             spawnNextPhase();
+        } else if (checkVictoryCondition()) {
+             System.out.println("¡NIVEL COMPLETADO!");
+             changeState(new LevelCompleteState());
         }
 
         // Actualizar todas las entidades
@@ -203,17 +193,15 @@ public class GameEngine {
     }
 
     private void handlePlayerDeath(Player player) {
-        System.out.println("¡JUGADOR MUERTO! Vidas antes: " + player.getLives());
 
         // Muerte instantánea - Game Over directo
         player.loseLife();
         player.setInactive();
 
-        // Resetear contador de frutas al morir
-        scoreService.setFruitsCollected(0);
-        System.out.println("Contador de frutas reseteado tras muerte del jugador");
-
-        System.out.println("Vidas después: " + player.getLives() + ", Activo: " + player.isActive());
+        // Resetear contador de frutas al morir - SOLO en modo 1 jugador
+        if (currentMode == GameMode.ONE_PLAYER) {
+             scoreService.setFruitsCollected(0);
+        }
 
         // Si todos los jugadores están muertos, game over
         boolean allDead = true;
@@ -225,24 +213,11 @@ public class GameEngine {
         }
 
         if (allDead) {
-            System.out.println("Todos los jugadores muertos. Cambiando a Game Over...");
             changeState(new GameOverState());
         }
     }
 
-    private void resetPositions() {
-        // Resetear posición del jugador (asumiendo (1,1) como inicio por ahora)
-        // Resetear posición del jugador (asumiendo (1,1) como inicio por ahora)
-        if (currentMap != null) {
-            List<Player> players = currentMap.getPlayers();
-            if (!players.isEmpty()) {
-                players.get(0).setPosition(new Position(1, 1));
-                if (players.size() > 1) {
-                    players.get(1).setPosition(new Position(13, 1));
-                }
-            }
-        }
-    }
+
 
     /**
      * Mueve al jugador en una dirección.
@@ -420,8 +395,6 @@ public class GameEngine {
             currentPhase = 1;
             totalPhases = 3;
 
-            Player player = currentMap.getPlayer();
-
             // FASE 1: Plátanos (100 pts c/u) - NUEVAS POSICIONES sin bloques
             currentMap.addEntity(EntityFactory.createBasicFruit(1, 2, "platano", 100));
             currentMap.addEntity(EntityFactory.createBasicFruit(13, 2, "platano", 100));
@@ -505,22 +478,7 @@ public class GameEngine {
         return currentPhase >= totalPhases && scoreService.areAllFruitsCollected();
     }
 
-    /**
-     * Verifica si se cumple la condición de derrota.
-     */
-    public boolean checkDefeatCondition() {
-        if (currentMap == null)
-            return true;
 
-        boolean allDead = true;
-        for (Player p : currentMap.getPlayers()) {
-            if (p.isActive() && p.getLives() > 0) {
-                allDead = false;
-                break;
-            }
-        }
-        return allDead;
-    }
 
     /**
      * Carga el nivel actual por número.
@@ -800,8 +758,8 @@ public class GameEngine {
             strategy = new HungryStrategy();
         }
         
-        // Ejecutar movimiento cada 10 ticks para no ser tan rápido
-        if (tickCounter % 10 == 0) {
+        // Ejecutar movimiento cada 3 ticks (aprox 300ms, más rápido que antes)
+        if (tickCounter % 3 == 0) {
             Direction nextDir = strategy.calculateNextMove(player, currentMap);
             movePlayer(nextDir, playerIndex);
         }
