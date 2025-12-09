@@ -56,7 +56,7 @@ public class GameController {
         this.levelSelectionPanel = new LevelSelectionPanel();
         this.playerColorSelectionPanel = new PlayerColorSelectionPanel();
         // Inicializar con modo por defecto, se actualizará al mostrar
-        this.botProfileSelectionPanel = new BotProfileSelectionPanel(GameMode.PVM); 
+        this.botProfileSelectionPanel = new BotProfileSelectionPanel(GameMode.PVM);
         this.victoryPanel = new VictoryPanel();
         this.mainFrame = new MainFrame();
 
@@ -184,10 +184,10 @@ public class GameController {
         // Configurar estrategias en el engine
         BotProfile p1Profile = panel.getBot1Profile();
         BotProfile p2Profile = panel.getBot2Profile();
-        
+
         gameEngine.setBot1Strategy(createStrategyFromProfile(p1Profile));
         gameEngine.setBot2Strategy(createStrategyFromProfile(p2Profile));
-        
+
         if (selectedGameMode == GameMode.MVM) {
             // MvM: Colores fijos, iniciar directo
             player1Color = "red";
@@ -202,18 +202,23 @@ public class GameController {
             mainFrame.showPanel(playerColorSelectionPanel);
         }
     }
-    
-    // Sobrecarga para mantener compatibilidad si es necesario, aunque usamos la versión con argumento
+
+    // Sobrecarga para mantener compatibilidad si es necesario, aunque usamos la
+    // versión con argumento
     private void handleBotProfileSelection() {
         // No-op, usamos el listener dinámico
     }
 
     private BotStrategy createStrategyFromProfile(BotProfile profile) {
         switch (profile) {
-            case HUNGRY: return new HungryStrategy();
-            case FEARFUL: return new FearfulStrategy();
-            case EXPERT: return new ExpertStrategy();
-            default: return new HungryStrategy();
+            case HUNGRY:
+                return new HungryStrategy();
+            case FEARFUL:
+                return new FearfulStrategy();
+            case EXPERT:
+                return new ExpertStrategy();
+            default:
+                return new HungryStrategy();
         }
     }
 
@@ -246,7 +251,31 @@ public class GameController {
      * Inicia el juego con los colores seleccionados.
      */
     private void startNewGameWithColors() {
+        // Mostrar diálogo de username antes de iniciar
+        boolean twoPlayers = (selectedGameMode == GameMode.PVP || selectedGameMode == GameMode.PVM);
+        UsernameDialog usernameDialog = new UsernameDialog(mainFrame, twoPlayers);
+        usernameDialog.setVisible(true);
+
+        if (!usernameDialog.isConfirmed()) {
+            // Usuario canceló, volver a selección de color
+            player1Color = null;
+            player2Color = null;
+            showGameModeSelection();
+            return;
+        }
+
+        // Iniciar juego con colores
         gameEngine.startNewGameWithColors(selectedGameMode, player1Color, player2Color);
+
+        // Asignar usernames a los jugadores
+        java.util.List<com.badice.domain.entities.Player> players = gameEngine.getCurrentMap().getPlayers();
+        if (!players.isEmpty()) {
+            players.get(0).setUsername(usernameDialog.getPlayer1Username());
+        }
+        if (players.size() > 1 && twoPlayers) {
+            players.get(1).setUsername(usernameDialog.getPlayer2Username());
+        }
+
         gameEngine.changeState(new PlayingState());
         showGamePanel();
         startGameLoop();

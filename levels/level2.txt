@@ -1,0 +1,28 @@
+# Nivel 2 - Cerezas y Piñas
+# Una fase con frutas especiales
+
+MAP_WIDTH=15
+MAP_HEIGHT=11
+PHASES=1
+
+# Fase 1: Cerezas (teletransporte) y Piñas (movimiento espejo)
+PHASE=1
+
+# Cerezas (150 puntos cada una)
+FRUIT=CHERRY,2,2,150
+FRUIT=CHERRY,12,2,150
+FRUIT=CHERRY,7,5,150
+
+# Piñas (200 puntos cada una)
+FRUIT=PINEAPPLE,4,4,200
+FRUIT=PINEAPPLE,10,4,200
+
+# Enemigos Maceta (persiguen al jugador)
+ENEMY=POT,13,9
+ENEMY=POT,1,9
+
+# Bloques de hielo del escenario
+BLOCK=3,3
+BLOCK=5,5
+BLOCK=9,5
+BLOCK=11,3

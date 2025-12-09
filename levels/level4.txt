@@ -1,0 +1,46 @@
+# Nivel 4 - Narval, Baldosas Calientes y 3 Fases
+# El nivel más difícil con múltiples fases
+
+MAP_WIDTH=15
+MAP_HEIGHT=11
+PHASES=3
+
+# Fase 1: Plátanos
+PHASE=1
+FRUIT=BANANA,1,2,100
+FRUIT=BANANA,13,2,100
+FRUIT=BANANA,7,2,100
+
+# Enemigos (Narval + Calamar)
+ENEMY=NARVAL,7,9
+ENEMY=SQUID,13,5
+
+# Bloques de hielo del escenario
+BLOCK=3,3
+BLOCK=5,5
+BLOCK=9,5
+BLOCK=11,3
+
+# Baldosas calientes (derriten hielo)
+HOTTILE=4,5
+HOTTILE=10,5
+HOTTILE=7,6
+HOTTILE=5,8
+HOTTILE=9,8
+
+# Fogatas
+CAMPFIRE=2,5
+CAMPFIRE=12,5
+
+# Fase 2: Uvas
+PHASE=2
+FRUIT=GRAPE,2,3,50
+FRUIT=GRAPE,12,3,50
+FRUIT=GRAPE,5,7,50
+FRUIT=GRAPE,9,7,50
+
+# Fase 3: Cerezas
+PHASE=3
+FRUIT=CHERRY,4,2,150
+FRUIT=CHERRY,10,2,150
+FRUIT=CHERRY,7,8,150

@@ -1,0 +1,33 @@
+# Nivel 3 - Cactus, Piñas y Fogatas
+# Una fase con obstáculos peligrosos
+
+MAP_WIDTH=15
+MAP_HEIGHT=11
+PHASES=1
+
+# Fase 1: Cactus y Piñas
+PHASE=1
+
+# Cactus (250 puntos cada uno)
+FRUIT=CACTUS,3,4,250
+FRUIT=CACTUS,11,4,250
+FRUIT=CACTUS,7,5,250
+
+# Piñas (200 puntos cada una)
+FRUIT=PINEAPPLE,2,8,200
+FRUIT=PINEAPPLE,12,8,200
+
+# Enemigos (Maceta + Calamar)
+ENEMY=POT,13,9
+ENEMY=SQUID,1,9
+
+# Bloques de hielo del escenario
+BLOCK=3,3
+BLOCK=5,5
+BLOCK=9,5
+BLOCK=11,3
+
+# Fogatas (obstáculos peligrosos)
+CAMPFIRE=6,3
+CAMPFIRE=8,3
+CAMPFIRE=7,7

@@ -1,0 +1,30 @@
+# Nivel 1 - Plátanos y Uvas
+# Dos fases: Plátanos primero, luego Uvas
+
+MAP_WIDTH=15
+MAP_HEIGHT=11
+PHASES=2
+
+# Fase 1: Plátanos (100 puntos cada uno)
+PHASE=1
+FRUIT=BANANA,2,2,100
+FRUIT=BANANA,12,2,100
+FRUIT=BANANA,7,3,100
+
+# Enemigos (aparecen desde el inicio)
+ENEMY=TROLL,13,9
+ENEMY=TROLL,1,9
+
+# Bloques de hielo del escenario
+BLOCK=3,3
+BLOCK=5,5
+BLOCK=9,5
+BLOCK=11,3
+
+# Fase 2: Uvas (50 puntos cada una)
+PHASE=2
+FRUIT=GRAPE,2,7,50
+FRUIT=GRAPE,12,7,50
+FRUIT=GRAPE,7,7,50
+FRUIT=GRAPE,4,4,50
+FRUIT=GRAPE,10,4,50

@@ -15,6 +15,7 @@ public class Player extends GameEntity implements Movable, Collidable {
     private int score;
     private Direction currentDirection;
     private String playerColor; // "red", "brown", "blue"
+    private String username; // Nombre del jugador
 
     public Player(Position position) {
         super(position);
@@ -23,6 +24,7 @@ public class Player extends GameEntity implements Movable, Collidable {
         this.score = 0;
         this.currentDirection = Direction.RIGHT;
         this.playerColor = "blue"; // Color por defecto
+        this.username = "Player"; // Username por defecto
     }
 
     public Player(Position position, String color) {
@@ -32,6 +34,7 @@ public class Player extends GameEntity implements Movable, Collidable {
         this.score = 0;
         this.currentDirection = Direction.RIGHT;
         this.playerColor = color;
+        this.username = "Player"; // Username por defecto
     }
 
     @Override
@@ -93,6 +96,14 @@ public class Player extends GameEntity implements Movable, Collidable {
 
     public void setPlayerColor(String color) {
         this.playerColor = color;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     @Override
