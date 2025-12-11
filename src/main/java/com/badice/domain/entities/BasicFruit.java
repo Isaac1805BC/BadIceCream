@@ -11,6 +11,11 @@ public class BasicFruit extends Fruit {
     }
 
     @Override
+    public void accept(com.badice.domain.interfaces.EntityVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
     protected void doUpdate() {
         // Las frutas básicas son estáticas, no necesitan actualización
     }

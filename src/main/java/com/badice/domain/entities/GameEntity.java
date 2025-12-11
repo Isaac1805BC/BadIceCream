@@ -62,6 +62,11 @@ public abstract class GameEntity implements Serializable {
      */
     public abstract String getEntityType();
 
+    /**
+     * Acepta un visitante (Patrón Visitor) para operaciones externas como renderizado.
+     */
+    public abstract void accept(com.badice.domain.interfaces.EntityVisitor visitor);
+
     @Override
     public boolean equals(Object o) {
         if (this == o)

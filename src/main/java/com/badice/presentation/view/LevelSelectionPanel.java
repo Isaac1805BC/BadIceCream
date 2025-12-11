@@ -9,11 +9,9 @@ import java.awt.image.BufferedImage;
  * Panel para seleccionar el nivel con temática de hielo.
  */
 public class LevelSelectionPanel extends JPanel {
-    private JButton level1Button;
-    private JButton level2Button;
-    private JButton level3Button;
-    private JButton level4Button;
+    private JPanel levelsPanel;
     private JButton backButton;
+    private java.util.function.Consumer<Integer> levelSelectionListener;
     private BufferedImage backgroundImage;
     private ResourceManager resourceManager;
 
@@ -61,31 +59,12 @@ public class LevelSelectionPanel extends JPanel {
         titlePanel.add(titleLabel);
 
         // Panel de botones de niveles
-        JPanel levelsPanel = new JPanel();
+        levelsPanel = new JPanel();
         levelsPanel.setLayout(new GridBagLayout());
         levelsPanel.setOpaque(false);
         levelsPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.insets = new Insets(15, 15, 15, 15);
-
-        // Crear botones de nivel con estilo de hielo
-        level1Button = createLevelButton("NIVEL 1", "Plátanos y Uvas");
-        level2Button = createLevelButton("NIVEL 2", "Cerezas y Piñas");
-        level3Button = createLevelButton("NIVEL 3", "Cactus y Piñas");
-
-        levelsPanel.add(level1Button, gbc);
-        gbc.gridx++;
-        levelsPanel.add(level2Button, gbc);
-        gbc.gridx++;
-        levelsPanel.add(level3Button, gbc);
-        gbc.gridx++;
-
-        // Nivel 4
-        level4Button = createLevelButton("NIVEL 4", "Narval y Fuego");
-        levelsPanel.add(level4Button, gbc);
+        
+        // Los botones se añadirán dinámicamente en reloadLevels
 
         // Botón de volver
         JPanel bottomPanel = new JPanel();
@@ -185,20 +164,37 @@ public class LevelSelectionPanel extends JPanel {
     }
 
     // Métodos para configurar listeners
-    public void setLevel1ButtonListener(ActionListener listener) {
-        level1Button.addActionListener(listener);
+    public void reloadLevels(java.util.List<Integer> levels) {
+        levelsPanel.removeAll();
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(15, 15, 15, 15);
+        
+        for (Integer level : levels) {
+             JButton btn = createLevelButton("NIVEL " + level, "Jugar Nivel " + level);
+             btn.addActionListener(e -> {
+                 if (levelSelectionListener != null) {
+                     levelSelectionListener.accept(level);
+                 }
+             });
+             
+             levelsPanel.add(btn, gbc);
+             
+             gbc.gridx++;
+             if (gbc.gridx > 3) { // Max 4 por fila
+                 gbc.gridx = 0;
+                 gbc.gridy++;
+             }
+        }
+        
+        levelsPanel.revalidate();
+        levelsPanel.repaint();
     }
 
-    public void setLevel2ButtonListener(ActionListener listener) {
-        level2Button.addActionListener(listener);
-    }
-
-    public void setLevel3ButtonListener(ActionListener listener) {
-        level3Button.addActionListener(listener);
-    }
-
-    public void setLevel4ButtonListener(ActionListener listener) {
-        level4Button.addActionListener(listener);
+    public void setLevelSelectionListener(java.util.function.Consumer<Integer> listener) {
+        this.levelSelectionListener = listener;
     }
 
     public void setBackButtonListener(ActionListener listener) {

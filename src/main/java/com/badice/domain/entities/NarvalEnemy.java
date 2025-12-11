@@ -3,112 +3,72 @@ package com.badice.domain.entities;
 import com.badice.domain.interfaces.MovementPattern;
 
 /**
- * Enemigo Narval: Recorre el mapa sin perseguir al jugador.
- * Cuando se alinea horizontal o verticalmente con el jugador, embiste en esa
- * dirección.
- * Durante la embestida, destruye bloques de hielo.
+ * Enemigo Narval: Embiste en línea recta cuando ve al jugador.
+ * Rompe bloques de hielo durante la embestida.
  */
 public class NarvalEnemy extends Enemy {
-    private static final int CHARGE_SPEED = 2; // Velocidad de embestida
-    private static final int NORMAL_SPEED = 1; // Velocidad normal
-
-    private boolean isCharging; // true si está embistiendo
-    private Direction chargeDirection; // Dirección de la embestida
-    private int chargeCounter; // Contador de frames de embestida
-    private static final int CHARGE_DURATION = 10; // Duración de embestida en frames
+    private boolean isCharging;
+    private Direction chargeDirection;
+    private long lastChargeTime;
+    private static final int CHARGE_SPEED = 3; // Velocidad durante embestida
 
     public NarvalEnemy(Position position, MovementPattern movementPattern) {
         super(position, movementPattern, "narval");
         this.isCharging = false;
         this.chargeDirection = null;
-        this.chargeCounter = 0;
-        setSpeed(NORMAL_SPEED);
+        this.lastChargeTime = 0;
     }
 
     /**
-     * Actualiza el estado del Narval.
-     * Verifica alineación con jugador y realiza embestida si corresponde.
-     */
-    @Override
-    protected void doUpdate() {
-        if (isCharging) {
-            // Continuar embestida
-            chargeCounter++;
-            if (chargeCounter >= CHARGE_DURATION) {
-                // Terminar embestida
-                endCharge();
-            }
-        } else {
-            // Actualización normal del patrón de movimiento
-            super.doUpdate();
-        }
-    }
-
-    /**
-     * Verifica si el Narval está alineado horizontal o verticalmente con el player.
+     * Verifica si el narval está alineado con el jugador (misma fila o columna)
      */
     public boolean isAlignedWithPlayer(Player player) {
-        if (player == null || !player.isActive()) {
-            return false;
-        }
+        if (isCharging) return false; // Ya está cargando
 
-        Position playerPos = player.getPosition();
-        // Alineados horizontalmente (misma Y)
-        if (this.position.getY() == playerPos.getY()) {
-            chargeDirection = (this.position.getX() < playerPos.getX()) ? Direction.RIGHT : Direction.LEFT;
-            return true;
-        }
-        // Alineados verticalmente (misma X)
-        if (this.position.getX() == playerPos.getX()) {
-            chargeDirection = (this.position.getY() < playerPos.getY()) ? Direction.DOWN : Direction.UP;
-            return true;
-        }
+        int dx = Math.abs(player.getPosition().getX() - this.position.getX());
+        int dy = Math.abs(player.getPosition().getY() - this.position.getY());
 
-        return false;
+        // Alineado si está en la misma fila (dy=0) o columna (dx=0)
+        return dx == 0 || dy == 0;
     }
 
     /**
-     * Inicia la embestida en la dirección del jugador.
+     * Inicia la embestida hacia la dirección actual o calculada.
      */
     public void startCharge() {
-        if (!isCharging && chargeDirection != null) {
-            this.isCharging = true;
-            this.chargeCounter = 0;
-            setSpeed(CHARGE_SPEED);
-        }
+        if (isCharging) return;
+
+        this.isCharging = true;
+        this.chargeDirection = this.getCurrentDirection(); // Cargar en la dirección que mira
+        // Podríamos recalcular la dirección hacia el jugador aquí si fuera necesario
     }
 
     /**
-     * Termina la embestida y vuelve al movimiento normal.
+     * Detiene la embestida.
      */
-    private void endCharge() {
+    public void stopCharge() {
         this.isCharging = false;
         this.chargeDirection = null;
-        this.chargeCounter = 0;
-        setSpeed(NORMAL_SPEED);
+        this.lastChargeTime = System.currentTimeMillis();
     }
 
-    /**
-     * Obtiene la dirección de la embestida actual.
-     */
-    public Direction getChargeDirection() {
-        return chargeDirection;
-    }
-
-    /**
-     * Verifica si el Narval está embistiendo.
-     */
     public boolean isCharging() {
         return isCharging;
     }
 
+    public Direction getChargeDirection() {
+        return chargeDirection;
+    }
+
     @Override
-    public void move(Direction direction) {
-        // Si está embistiendo, solo se mueve en la dirección de carga
-        if (isCharging) {
-            super.move(chargeDirection);
-        } else {
-            super.move(direction);
-        }
+    protected void doUpdate() {
+        super.doUpdate();
+        // Lógica adicional de actualización si es necesaria
+        // Por ejemplo, detener carga si choca con pared indestructible (gestionado en engine)
+    }
+
+    @Override
+    public void accept(com.badice.domain.interfaces.EntityVisitor visitor) {
+        visitor.visit(this);
     }
 }

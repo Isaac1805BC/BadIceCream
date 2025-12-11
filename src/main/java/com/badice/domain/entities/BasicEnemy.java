@@ -10,4 +10,9 @@ public class BasicEnemy extends Enemy {
     public BasicEnemy(Position position, MovementPattern movementPattern) {
         super(position, movementPattern, "basic");
     }
+
+    @Override
+    public void accept(com.badice.domain.interfaces.EntityVisitor visitor) {
+        visitor.visit(this);
+    }
 }

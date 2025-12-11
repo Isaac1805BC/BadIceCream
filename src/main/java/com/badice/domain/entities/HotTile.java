@@ -11,6 +11,11 @@ public class HotTile extends Block {
     public HotTile(Position position) {
         super(position, "hot_tile");
     }
+    
+    @Override
+    public void accept(com.badice.domain.interfaces.EntityVisitor visitor) {
+        visitor.visit(this);
+    }
 
     @Override
     protected void doUpdate() {

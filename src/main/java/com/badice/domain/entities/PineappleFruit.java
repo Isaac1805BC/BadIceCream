@@ -11,15 +11,19 @@ public class PineappleFruit extends Fruit {
     private final Player player;
     private final GameMap gameMap;
     private Position lastPlayerPosition;
+    private int moveCounter = 0;
 
     public PineappleFruit(Position position, Player player, GameMap gameMap) {
         super(position, "piña", POINTS);
         this.player = player;
         this.gameMap = gameMap;
-        this.lastPlayerPosition = player.getPosition();
+        if (player != null) {
+            this.lastPlayerPosition = player.getPosition();
+        } else {
+             // Fallback to fruit position if player is null (shouldn't happen in normal gameplay)
+             this.lastPlayerPosition = position;
+        }
     }
-
-    private int moveCounter = 0;
 
     @Override
     protected void doUpdate() {
@@ -90,5 +94,10 @@ public class PineappleFruit extends Fruit {
         if (!blockedBySolid) {
             this.position = newPosition;
         }
+    }
+
+    @Override
+    public void accept(com.badice.domain.interfaces.EntityVisitor visitor) {
+        visitor.visit(this);
     }
 }

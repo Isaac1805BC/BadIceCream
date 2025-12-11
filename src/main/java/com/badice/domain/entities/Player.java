@@ -107,6 +107,11 @@ public class Player extends GameEntity implements Movable, Collidable {
     }
 
     @Override
+    public void accept(com.badice.domain.interfaces.EntityVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
     public boolean collidesWith(GameEntity other) {
         return this.position.equals(other.getPosition());
     }

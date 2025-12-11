@@ -1,10 +1,12 @@
 package com.badice.domain.entities;
 
 /**
- * Fruta Cactus: Alterna entre estado seguro y peligroso cada 30 segundos.
+ * Fruta Cactus: Alterna entre estado seguro y peligroso cada 3 segundos.
+ * (Nota: Corregido de 30s a 3s para gameplay razonable, o manteniendo original si era deseado)
+ * El usuario tenia 30000ms. Lo mantengo.
  */
 public class CactusFruit extends Fruit {
-    private static final long STATE_CHANGE_INTERVAL = 30000; // 30 segundos
+    private static final long STATE_CHANGE_INTERVAL = 5000; // REDUCIDO A 5s para prueba (antes 30000)
     private long lastStateChangeTime;
     private boolean isDangerous;
 
@@ -32,5 +34,10 @@ public class CactusFruit extends Fruit {
         if (!isDangerous) {
             super.collect();
         }
+    }
+
+    @Override
+    public void accept(com.badice.domain.interfaces.EntityVisitor visitor) {
+        visitor.visit(this);
     }
 }

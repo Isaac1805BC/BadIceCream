@@ -217,4 +217,34 @@ public class LevelLoader {
                     "0");
         }
     }
+    /**
+     * Obtiene una lista de los números de nivel disponibles en el directorio de niveles.
+     */
+    public java.util.List<Integer> getAvailableLevels() {
+        java.util.List<Integer> levels = new java.util.ArrayList<>();
+        File folder = new File(LEVELS_DIR);
+        
+        if (!folder.exists() || !folder.isDirectory()) {
+            return levels;
+        }
+        
+        File[] files = folder.listFiles((dir, name) -> name.startsWith("level") && name.endsWith(".txt"));
+        
+        if (files != null) {
+            for (File file : files) {
+                try {
+                    String name = file.getName();
+                    // Extraer número de "levelX.txt"
+                    String numberStr = name.substring(5, name.length() - 4);
+                    int levelNum = Integer.parseInt(numberStr);
+                    levels.add(levelNum);
+                } catch (NumberFormatException e) {
+                    logger.logError("Archivo de nivel con nombre inválido: " + file.getName(), e);
+                }
+            }
+        }
+        
+        java.util.Collections.sort(levels);
+        return levels;
+    }
 }

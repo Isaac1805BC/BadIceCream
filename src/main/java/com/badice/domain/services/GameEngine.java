@@ -1,5 +1,7 @@
 package com.badice.domain.services;
 
+import com.badice.domain.config.LevelConfig.EntityConfig;
+import com.badice.domain.config.LevelConfig.PhaseConfig;
 import com.badice.domain.entities.*;
 import com.badice.domain.interfaces.MovementPattern;
 import com.badice.domain.models.GameSaveData;
@@ -24,6 +26,7 @@ public class GameEngine {
     private final IceManager iceManager;
     private final ScoreService scoreService;
     private final GameStateManager stateManager;
+    private final LevelLoader levelLoader;
 
     // Estado del juego
     private GameMap currentMap;
@@ -31,6 +34,7 @@ public class GameEngine {
     private long pausedTime;
     private boolean isPaused;
     private int currentLevelNumber;
+    private com.badice.domain.config.LevelConfig currentLevelConfig;
 
     // Sistema de fases
     private int currentPhase;
@@ -54,6 +58,7 @@ public class GameEngine {
         this.iceManager = new IceManager();
         this.scoreService = new ScoreService();
         this.stateManager = new GameStateManager(this);
+        this.levelLoader = new LevelLoader();
 
         // Inicializar estado
         this.isPaused = false;
@@ -280,10 +285,21 @@ public class GameEngine {
         return iceManager.destroyIceBlock(playerPos, direction, currentMap);
     }
 
+
+
     /**
-     * Crea un nivel hardcodeado (sin archivos JSON).
+     * Crea un nivel cargando la configuración desde archivo.
      */
     private void createLevel(int levelNumber) {
+        try {
+            this.currentLevelConfig = levelLoader.loadLevel(levelNumber);
+        } catch (com.badice.domain.exceptions.LevelLoadException e) {
+            System.err.println("Error cargando nivel " + levelNumber + ": " + e.getMessage());
+            e.printStackTrace();
+            currentMap = EntityFactory.createDefaultMap();
+            return;
+        }
+
         currentMap = EntityFactory.createDefaultMap();
 
         // Crear jugadores según el modo
@@ -298,9 +314,6 @@ public class GameEngine {
             currentMap.addPlayer(p2);
         }
 
-        // Configurar IA si es necesario (PVM o MVM)
-        // La IA se maneja en updateAI()
-
         // Crear paredes del borde
         for (int x = 0; x < 15; x++) {
             currentMap.addEntity(EntityFactory.createWall(x, 0));
@@ -311,127 +324,90 @@ public class GameEngine {
             currentMap.addEntity(EntityFactory.createWall(14, y));
         }
 
-        // Añadir obstáculos internos (Hielo destructible)
-        currentMap.addEntity(EntityFactory.createIceBlock(3, 3));
-        currentMap.addEntity(EntityFactory.createIceBlock(5, 5));
-        currentMap.addEntity(EntityFactory.createIceBlock(9, 5));
-        currentMap.addEntity(EntityFactory.createIceBlock(11, 3));
+        // Configurar fases
+        this.totalPhases = currentLevelConfig.getTotalPhases();
+        this.currentPhase = 1;
 
-        // Configurar fases y frutas según nivel
-        if (levelNumber == 1) {
-            // Nivel 1: Fase 1 (Plátanos) → Fase 2 (Uvas)
-            currentPhase = 1;
-            totalPhases = 2;
-
-            // Fase 1: Plátanos amarillos (100 puntos c/u)
-            // Posiciones que NO coinciden con bloques
-            currentMap.addEntity(EntityFactory.createBasicFruit(2, 2, "platano", 100));
-            currentMap.addEntity(EntityFactory.createBasicFruit(12, 2, "platano", 100));
-            currentMap.addEntity(EntityFactory.createBasicFruit(7, 3, "platano", 100));
-
-            // Configurar score service - cuenta solo plátanos inicialmente
-            scoreService.setTotalFruits(3);
-
-            // Añadir enemigos Troll (nivel 1: movimiento horizontal)
-            currentMap.addEntity(EntityFactory.createTrollEnemy(13, 9));
-            currentMap.addEntity(EntityFactory.createTrollEnemy(1, 9));
-        } else if (levelNumber == 2) {
-            // Nivel 2: Cerezas (teleport) y Piñas (mirror movement)
-            currentPhase = 1;
-            totalPhases = 1;
-
-            // Obtener el jugador para las piñas
-            Player player = currentMap.getPlayer();
-
-            // Añadir cerezas (se teletransportan cada 20 segundos, 150 puntos c/u)
-            currentMap.addEntity(EntityFactory.createCherryFruit(2, 2, currentMap));
-            currentMap.addEntity(EntityFactory.createCherryFruit(12, 2, currentMap));
-            currentMap.addEntity(EntityFactory.createCherryFruit(7, 5, currentMap));
-
-            // Añadir piñas (se mueven cuando el jugador se mueve, 200 puntos c/u)
-            if (player != null) {
-                currentMap.addEntity(EntityFactory.createPineappleFruit(4, 4, player, currentMap));
-                currentMap.addEntity(EntityFactory.createPineappleFruit(10, 4, player, currentMap));
-            }
-
-            // Total: 3 cerezas + 2 piñas = 5 frutas
-            scoreService.setTotalFruits(5);
-
-            // Añadir enemigo Maceta (nivel 2: persigue al jugador)
-            currentMap.addEntity(EntityFactory.createPotEnemy(13, 9));
-            currentMap.addEntity(EntityFactory.createPotEnemy(1, 9));
-        } else if (levelNumber == 3) {
-            // Nivel 3: Cactus (peligrosos) y Piñas + FOGATAS
-            currentPhase = 1;
-            totalPhases = 1;
-
-            Player player = currentMap.getPlayer();
-
-            // Añadir Cactus (250 puntos c/u)
-            currentMap.addEntity(EntityFactory.createCactusFruit(3, 4));
-            currentMap.addEntity(EntityFactory.createCactusFruit(11, 4));
-            currentMap.addEntity(EntityFactory.createCactusFruit(7, 5));
-
-            // Añadir Piñas (200 puntos c/u)
-            if (player != null) {
-                currentMap.addEntity(EntityFactory.createPineappleFruit(2, 8, player, currentMap));
-                currentMap.addEntity(EntityFactory.createPineappleFruit(12, 8, player, currentMap));
-            }
-
-            // Total: 3 cactus + 2 piñas = 5 frutas
-            scoreService.setTotalFruits(5);
-
-            // NUEVO: Añadir FOGATAS en posiciones estratégicas
-            currentMap.addEntity(EntityFactory.createCampfire(6, 3));
-            currentMap.addEntity(EntityFactory.createCampfire(8, 3));
-            currentMap.addEntity(EntityFactory.createCampfire(7, 7));
-
-            // Añadir enemigos (mezcla: Maceta + Calamar)
-            currentMap.addEntity(EntityFactory.createPotEnemy(13, 9));
-            // Calamar rompe hielo
-            currentMap.addEntity(EntityFactory.createSquidEnemy(1, 9, currentMap));
-        } else if (levelNumber == 4) {
-            // Nivel 4: NUEVO - Con BALDOSAS CALIENTES, NARVAL y 3 FASES
-            currentPhase = 1;
-            totalPhases = 3;
-
-            // FASE 1: Plátanos (100 pts c/u) - NUEVAS POSICIONES sin bloques
-            currentMap.addEntity(EntityFactory.createBasicFruit(1, 2, "platano", 100));
-            currentMap.addEntity(EntityFactory.createBasicFruit(13, 2, "platano", 100));
-            currentMap.addEntity(EntityFactory.createBasicFruit(7, 2, "platano", 100));
-
-            scoreService.setTotalFruits(3);
-
-            // NUEVO: Añadir BALDOSAS CALIENTES (no bloquean pero derriten hielo)
-            currentMap.addEntity(EntityFactory.createHotTile(4, 5));
-            currentMap.addEntity(EntityFactory.createHotTile(10, 5));
-            currentMap.addEntity(EntityFactory.createHotTile(7, 6));
-            currentMap.addEntity(EntityFactory.createHotTile(5, 8));
-            currentMap.addEntity(EntityFactory.createHotTile(9, 8));
-
-            // NUEVO: Añadir FOGATAS también
-            currentMap.addEntity(EntityFactory.createCampfire(2, 5));
-            currentMap.addEntity(EntityFactory.createCampfire(12, 5));
-
-            // NUEVO: Enemigo NARVAL que embiste
-            currentMap.addEntity(EntityFactory.createNarvalEnemy(7, 9));
-            // Añadir también un Calamar para variedad
-            currentMap.addEntity(EntityFactory.createSquidEnemy(13, 5, currentMap));
-        } else {
-            // Otros niveles: comportamiento por defecto
-            currentPhase = 1;
-            totalPhases = 1;
-            currentMap.addEntity(EntityFactory.createBasicFruit(7, 5, "apple", 100));
-            scoreService.setTotalFruits(1);
-
-            // Añadir enemigos
-            currentMap.addEntity(EntityFactory.createEnemy(13, 9, "horizontal", "basic"));
-            currentMap.addEntity(EntityFactory.createEnemy(1, 9, "vertical", "basic"));
+        // Cargar entidades de la fase 1
+        if (!currentLevelConfig.getPhases().isEmpty()) {
+            setupPhase(currentLevelConfig.getPhases().get(0));
         }
+        
+        // Calcular frutas SOLO de la primera fase para iniciar
+        int phase1Fruits = 0;
+        if (!currentLevelConfig.getPhases().isEmpty()) {
+            com.badice.domain.config.LevelConfig.PhaseConfig phase1 = currentLevelConfig.getPhases().get(0);
+            for (com.badice.domain.config.LevelConfig.EntityConfig entity : phase1.getEntities()) {
+                 if ("FRUIT".equals(entity.getType())) {
+                     phase1Fruits++;
+                 }
+            }
+        }
+        scoreService.setTotalFruits(phase1Fruits);
 
         scoreService.setCurrentLevel(levelNumber);
-
         resetGameTimer();
+    }
+
+    private void setupPhase(PhaseConfig phase) {
+        for (EntityConfig entity : phase.getEntities()) {
+            int x = entity.getPosition().getX();
+            int y = entity.getPosition().getY();
+            
+            switch (entity.getType()) {
+                case "FRUIT":
+                    createFruitEntity(entity, x, y);
+                    break;
+                case "ENEMY":
+                    createEnemyEntity(entity, x, y);
+                    break;
+                case "BLOCK":
+                    if ("ICE".equals(entity.getSubType())) {
+                        currentMap.addEntity(EntityFactory.createIceBlock(x, y));
+                    }
+                    break;
+                case "CAMPFIRE":
+                    currentMap.addEntity(EntityFactory.createCampfire(x, y));
+                    break;
+                case "HOTTILE":
+                    currentMap.addEntity(EntityFactory.createHotTile(x, y));
+                    break;
+            }
+        }
+    }
+
+    private void createFruitEntity(com.badice.domain.config.LevelConfig.EntityConfig entity, int x, int y) {
+        String subType = entity.getSubType().toLowerCase();
+        int points = entity.getPoints();
+
+        if (subType.contains("cherry") || subType.contains("cereza")) {
+            currentMap.addEntity(EntityFactory.createCherryFruit(x, y, currentMap));
+        } else if (subType.contains("pineapple") || subType.contains("piña")) {
+            Player player = currentMap.getPlayer();
+            if (player != null) {
+                currentMap.addEntity(EntityFactory.createPineappleFruit(x, y, player, currentMap));
+            }
+        } else if (subType.contains("cactus")) {
+            currentMap.addEntity(EntityFactory.createCactusFruit(x, y));
+        } else {
+            currentMap.addEntity(EntityFactory.createBasicFruit(x, y, subType, points));
+        }
+    }
+
+    private void createEnemyEntity(com.badice.domain.config.LevelConfig.EntityConfig entity, int x, int y) {
+        String subType = entity.getSubType().toUpperCase();
+        
+        if (subType.contains("TROLL")) {
+            currentMap.addEntity(EntityFactory.createTrollEnemy(x, y));
+        } else if (subType.contains("POT") || subType.contains("MACETA")) {
+            currentMap.addEntity(EntityFactory.createPotEnemy(x, y));
+        } else if (subType.contains("SQUID") || subType.contains("CALAMAR")) {
+             currentMap.addEntity(EntityFactory.createSquidEnemy(x, y, currentMap));
+        } else if (subType.contains("NARVAL")) {
+            currentMap.addEntity(EntityFactory.createNarvalEnemy(x, y));
+        } else {
+             currentMap.addEntity(EntityFactory.createEnemy(x, y, "horizontal", "basic"));
+        }
     }
 
     /**
@@ -439,33 +415,19 @@ public class GameEngine {
      */
     private void spawnNextPhase() {
         currentPhase++;
-
-        if (currentLevelNumber == 1 && currentPhase == 2) {
-            // Nivel 1, Fase 2: Spawner uvas moradas
-            // Posiciones que NO coinciden con bloques
-            currentMap.addEntity(EntityFactory.createBasicFruit(2, 7, "uva", 50));
-            currentMap.addEntity(EntityFactory.createBasicFruit(12, 7, "uva", 50));
-            currentMap.addEntity(EntityFactory.createBasicFruit(7, 7, "uva", 50));
-            currentMap.addEntity(EntityFactory.createBasicFruit(4, 4, "uva", 50));
-            currentMap.addEntity(EntityFactory.createBasicFruit(10, 4, "uva", 50));
-
-            // Actualizar score service para contar uvas
-            scoreService.nextPhase(5); // 5 uvas
-        } else if (currentLevelNumber == 4 && currentPhase == 2) {
-            // Nivel 4, Fase 2: Uvas moradas (50 pts c/u)
-            currentMap.addEntity(EntityFactory.createBasicFruit(2, 3, "uva", 50));
-            currentMap.addEntity(EntityFactory.createBasicFruit(12, 3, "uva", 50));
-            currentMap.addEntity(EntityFactory.createBasicFruit(5, 7, "uva", 50));
-            currentMap.addEntity(EntityFactory.createBasicFruit(9, 7, "uva", 50));
-
-            scoreService.nextPhase(4); // 4 uvas
-        } else if (currentLevelNumber == 4 && currentPhase == 3) {
-            // Nivel 4, Fase 3: Cerezas (teletransporte, 150 pts c/u)
-            currentMap.addEntity(EntityFactory.createCherryFruit(4, 2, currentMap));
-            currentMap.addEntity(EntityFactory.createCherryFruit(10, 2, currentMap));
-            currentMap.addEntity(EntityFactory.createCherryFruit(7, 8, currentMap));
-
-            scoreService.nextPhase(3); // 3 cerezas
+        
+        if (currentLevelConfig != null && currentLevelConfig.getPhases().size() >= currentPhase) {
+            PhaseConfig phaseConfig = currentLevelConfig.getPhases().get(currentPhase - 1);
+            setupPhase(phaseConfig);
+            
+            int fruitsAdded = 0;
+            for (EntityConfig e : phaseConfig.getEntities()) {
+                if ("FRUIT".equals(e.getType())) fruitsAdded++;
+            }
+            scoreService.nextPhase(fruitsAdded);
+            
+        } else {
+             System.out.println("Warning: Fase " + currentPhase + " solicitada pero no existe configuración.");
         }
     }
 
@@ -473,12 +435,15 @@ public class GameEngine {
      * Verifica si se cumple la condición de victoria.
      */
     public boolean checkVictoryCondition() {
-        // Victoria solo si estamos en la última fase y todas las frutas están
-        // recolectadas
         return currentPhase >= totalPhases && scoreService.areAllFruitsCollected();
     }
 
-
+    /**
+     * Obtiene los niveles disponibles desde el cargador.
+     */
+    public java.util.List<Integer> getAvailableLevels() {
+        return levelLoader.getAvailableLevels();
+    }
 
     /**
      * Carga el nivel actual por número.
@@ -526,9 +491,6 @@ public class GameEngine {
         loadCurrentLevel();
     }
 
-    /**
-     * Inicia un nuevo juego.
-     */
     /**
      * Inicia un nuevo juego.
      */

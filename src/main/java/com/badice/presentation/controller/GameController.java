@@ -85,10 +85,7 @@ public class GameController {
         gameModeSelectionPanel.setBackButtonListener(e -> showMenu());
 
         // Level selection panel listeners
-        levelSelectionPanel.setLevel1ButtonListener(e -> showGameModeSelectionForLevel(1));
-        levelSelectionPanel.setLevel2ButtonListener(e -> showGameModeSelectionForLevel(2));
-        levelSelectionPanel.setLevel3ButtonListener(e -> showGameModeSelectionForLevel(3));
-        levelSelectionPanel.setLevel4ButtonListener(e -> showGameModeSelectionForLevel(4));
+        levelSelectionPanel.setLevelSelectionListener(this::showGameModeSelectionForLevel);
         levelSelectionPanel.setBackButtonListener(e -> showMenu());
 
         // Player color selection panel listeners
@@ -347,6 +344,7 @@ public class GameController {
      * Muestra la selección de nivel.
      */
     private void showLevelSelection() {
+        levelSelectionPanel.reloadLevels(gameEngine.getAvailableLevels());
         mainFrame.showPanel(levelSelectionPanel);
     }
 

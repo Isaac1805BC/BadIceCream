@@ -44,12 +44,33 @@ public class GamePanel extends JPanel {
             return;
         }
 
-        // Calcular offset para centrar el grid horizontalmente
-        int mapPixelWidth = map.getWidth() * 32; // 32 = cellSize
+        // Espacio para el HUD en la parte superior
+        int hudHeight = 50;
+        
+        // Calcular el espacio disponible para el grid
+        int availableWidth = getWidth();
+        int availableHeight = getHeight() - hudHeight;
+        
+        // Calcular el tamaño de celda óptimo que llena el espacio disponible
+        int cellSizeByWidth = availableWidth / map.getWidth();
+        int cellSizeByHeight = availableHeight / map.getHeight();
+        
+        // Usar el menor valor para que todo el grid quepa
+        int cellSize = Math.min(cellSizeByWidth, cellSizeByHeight);
+        
+        // Asegurar un tamaño mínimo de celda
+        cellSize = Math.max(cellSize, 16);
+        
+        // Actualizar el cellSize del renderer
+        entityRenderer.setCellSize(cellSize);
+        
+        // Calcular dimensiones del mapa en píxeles
+        int mapPixelWidth = map.getWidth() * cellSize;
+        int mapPixelHeight = map.getHeight() * cellSize;
+        
+        // Calcular offset para centrar el grid
         int horizontalOffset = (getWidth() - mapPixelWidth) / 2;
-
-        // Offset vertical para dejar espacio al HUD
-        int verticalOffset = 50;
+        int verticalOffset = hudHeight + (availableHeight - mapPixelHeight) / 2;
 
         // Aplicar offset para centrar
         g2d.translate(horizontalOffset, verticalOffset);
@@ -57,7 +78,6 @@ public class GamePanel extends JPanel {
         // Renderizar background si está disponible
         if (backgroundImage != null) {
             // Dibujar el background escalado para cubrir todo el área del mapa
-            int mapPixelHeight = map.getHeight() * 32;
             g2d.drawImage(backgroundImage, 0, 0, mapPixelWidth, mapPixelHeight, null);
         }
 

@@ -108,6 +108,11 @@ public class IceBlock extends GameEntity implements Collidable, Destructible {
     }
 
     @Override
+    public void accept(com.badice.domain.interfaces.EntityVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
     public String getEntityType() {
         return ENTITY_TYPE;
     }

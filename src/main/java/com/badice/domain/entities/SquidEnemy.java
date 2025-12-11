@@ -58,4 +58,9 @@ public class SquidEnemy extends Enemy {
     public boolean isBreakingIce() {
         return isBreakingIce;
     }
+
+    @Override
+    public void accept(com.badice.domain.interfaces.EntityVisitor visitor) {
+        visitor.visit(this);
+    }
 }

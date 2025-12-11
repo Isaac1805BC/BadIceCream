@@ -19,6 +19,10 @@ public class Campfire extends Block {
         this.extinguishedTime = 0;
     }
 
+    public boolean isLit() {
+        return isLit;
+    }
+
     @Override
     protected void doUpdate() {
         // Si está apagada, verificar si debe volver a encenderse
@@ -46,18 +50,6 @@ public class Campfire extends Block {
     private void relight() {
         this.isLit = true;
         this.extinguishedTime = 0;
-    }
-
-    /**
-     * Verifica si la fogata está encendida.
-     */
-    public boolean isLit() {
-        return isLit;
-    }
-
-    @Override
-    public boolean isSolid() {
-        return false;
     }
 
     @Override
