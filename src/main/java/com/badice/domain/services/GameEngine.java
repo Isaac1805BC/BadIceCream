@@ -176,9 +176,12 @@ public class GameEngine {
         List<Player> players = currentMap.getPlayers();
         for (Player player : players) {
             if (player != null && player.isActive()) {
-                if (player != null && player.isActive()) {
-                    // Usar el método centralizado que maneja frutas, enemigos Y FOGATAS
-                    collisionDetector.handlePlayerCollisions(player, currentMap, scoreService);
+                // Usar el método centralizado que maneja frutas, enemigos Y FOGATAS
+                boolean playerDied = collisionDetector.handlePlayerCollisions(player, currentMap, scoreService);
+                
+                // Si el jugador murió por una colisión fatal (campfire), manejar la muerte
+                if (playerDied) {
+                    handlePlayerDeath(player);
                 }
             }
         }

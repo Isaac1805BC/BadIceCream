@@ -62,6 +62,17 @@ public class Campfire extends Block {
     }
 
     @Override
+    public boolean isSolid() {
+        return false;
+    }
+
+    @Override
+    public void accept(com.badice.domain.interfaces.EntityVisitor visitor) {
+        visitor.visit(this);
+    }
+
+
+    @Override
     public String getEntityType() {
         return ENTITY_TYPE;
     }

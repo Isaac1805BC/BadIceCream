@@ -36,7 +36,6 @@ public class CollisionDetector {
 
             if (entity instanceof Collidable) {
                 Collidable collidable = (Collidable) entity;
-                // Debug: Verificar distancia
                 if (entity instanceof Fruit) {
                     if (entity.getPosition().equals(player.getPosition())) {
                     }
@@ -62,9 +61,11 @@ public class CollisionDetector {
 
     /**
      * Maneja las colisiones del jugador.
+     * @return true si el jugador murió por una colisión fatal (campfire), false de lo contrario
      */
-    public void handlePlayerCollisions(Player player, GameMap map, ScoreService scoreService) {
+    public boolean handlePlayerCollisions(Player player, GameMap map, ScoreService scoreService) {
         List<GameEntity> collisions = detectPlayerCollisions(player, map);
+        boolean playerDied = false;
 
         for (GameEntity entity : collisions) {
             if (entity instanceof Fruit) {
@@ -80,7 +81,7 @@ public class CollisionDetector {
             } else if (entity instanceof Campfire) {
                 Campfire campfire = (Campfire) entity;
                 if (campfire.isLit()) {
-                    handlePlayerCampfireCollision(player, campfire);
+                    playerDied = handlePlayerCampfireCollision(player, campfire);
                 }
             }
         }
@@ -91,10 +92,12 @@ public class CollisionDetector {
             if (entity instanceof Campfire && entity.isActive()) {
                 Campfire campfire = (Campfire) entity;
                 if (campfire.isLit() && campfire.getPosition().equals(player.getPosition())) {
-                    handlePlayerCampfireCollision(player, campfire);
+                    playerDied = handlePlayerCampfireCollision(player, campfire);
                 }
             }
         }
+        
+        return playerDied;
     }
 
     /**
@@ -125,11 +128,11 @@ public class CollisionDetector {
 
     /**
      * Maneja la colisión entre jugador y fogata encendida.
+     * @return true para indicar que el jugador murió
      */
-    private void handlePlayerCampfireCollision(Player player, Campfire campfire) {
+    private boolean handlePlayerCampfireCollision(Player player, Campfire campfire) {
         // El jugador muere instantáneamente
-        player.loseLife();
-        player.setInactive();
-        System.out.println("¡Jugador eliminado por fogata!");
+        System.out.println("¡Jugador colisionó con fogata!");
+        return true; // Indicar que ocurrió una muerte fatal
     }
 }
