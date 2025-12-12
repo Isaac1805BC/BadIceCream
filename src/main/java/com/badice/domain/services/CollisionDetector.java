@@ -68,7 +68,21 @@ public class CollisionDetector {
         boolean playerDied = false;
 
         for (GameEntity entity : collisions) {
-            if (entity instanceof Fruit) {
+            if (entity instanceof CactusFruit) {
+                // Manejar cactus especialmente - verificar si está en modo peligroso
+                CactusFruit cactus = (CactusFruit) entity;
+                if (cactus.killsPlayerOnContact()) {
+                    // El jugador muere al tocar un cactus peligroso
+                    System.out.println("¡Jugador colisionó con cactus peligroso!");
+                    return true; // Indicar muerte fatal
+                } else if (!cactus.isCollected()) {
+                    // Solo recolectar si está seguro
+                    cactus.collect();
+                    int points = cactus.getPoints();
+                    scoreService.addFruitScore(points);
+                    player.addScore(points);
+                }
+            } else if (entity instanceof Fruit) {
                 Fruit fruit = (Fruit) entity;
                 if (!fruit.isCollected()) {
                     fruit.collect();

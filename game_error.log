@@ -1,51 +1,84 @@
-[2025-12-10 22:18:18] [INFO] GameLogger initialized
-[2025-12-10 22:18:25] [INFO] Nivel cargado exitosamente: levels/level1.txt
-[2025-12-10 22:18:53] [INFO] Nivel cargado exitosamente: levels/level1.txt
-[2025-12-10 22:19:04] [INFO] Nivel cargado exitosamente: levels/level4.txt
-[2025-12-10 22:32:19] [INFO] GameLogger initialized
-[2025-12-10 22:32:28] [INFO] Nivel cargado exitosamente: levels/level1.txt
-[2025-12-10 22:33:01] [INFO] GameLogger initialized
-[2025-12-10 22:33:10] [INFO] Nivel cargado exitosamente: levels/level1.txt
-[2025-12-10 22:34:02] [INFO] GameLogger initialized
-[2025-12-10 22:34:08] [INFO] Nivel cargado exitosamente: levels/level5.txt
-[2025-12-10 22:35:11] [INFO] GameLogger initialized
-[2025-12-10 22:35:16] [INFO] Nivel cargado exitosamente: levels/level5.txt
-[2025-12-10 22:46:43] [INFO] GameLogger initialized
-[2025-12-10 22:46:50] [INFO] Nivel cargado exitosamente: levels/level1.txt
-[2025-12-10 22:47:00] [INFO] Nivel cargado exitosamente: levels/level1.txt
-[2025-12-10 23:14:51] [INFO] GameLogger initialized
-[2025-12-10 23:15:02] [INFO] Nivel cargado exitosamente: levels/level1.txt
-[2025-12-10 23:15:13] [INFO] Nivel cargado exitosamente: levels/level2.txt
-[2025-12-10 23:15:19] [INFO] Nivel cargado exitosamente: levels/level3.txt
-[2025-12-10 23:15:23] [INFO] Nivel cargado exitosamente: levels/level3.txt
-[2025-12-10 23:15:35] [INFO] Nivel cargado exitosamente: levels/level1.txt
-[2025-12-10 23:17:37] [INFO] GameLogger initialized
-[2025-12-10 23:17:45] [INFO] Nivel cargado exitosamente: levels/level1.txt
-[2025-12-10 23:26:38] [INFO] GameLogger initialized
-[2025-12-10 23:27:00] [INFO] Nivel cargado exitosamente: levels/level1.txt
-[2025-12-10 23:27:17] [INFO] Nivel cargado exitosamente: levels/level1.txt
-[2025-12-10 23:27:43] [INFO] Nivel cargado exitosamente: levels/level5.txt
-[2025-12-10 23:29:06] [INFO] GameLogger initialized
-[2025-12-10 23:29:17] [INFO] Nivel cargado exitosamente: levels/level5.txt
-[2025-12-10 23:29:36] [INFO] Nivel cargado exitosamente: levels/level5.txt
-[2025-12-10 23:30:28] [INFO] GameLogger initialized
-[2025-12-10 23:30:36] [INFO] Nivel cargado exitosamente: levels/level5.txt
-[2025-12-10 23:34:07] [INFO] GameLogger initialized
-[2025-12-10 23:34:21] [INFO] Nivel cargado exitosamente: levels/level5.txt
-[2025-12-10 23:34:44] [INFO] Nivel cargado exitosamente: levels/level5.txt
-[2025-12-10 23:35:05] [INFO] Nivel cargado exitosamente: levels/level1.txt
-[2025-12-11 00:05:11] [INFO] GameLogger initialized
-[2025-12-11 00:05:15] [INFO] Nivel cargado exitosamente: levels/level3.txt
-[2025-12-11 00:05:28] [INFO] GameLogger initialized
-[2025-12-11 00:05:34] [INFO] Nivel cargado exitosamente: levels/level1.txt
-[2025-12-11 00:05:47] [INFO] Nivel cargado exitosamente: levels/level3.txt
-[2025-12-11 00:05:50] [INFO] Nivel cargado exitosamente: levels/level3.txt
-[2025-12-11 00:10:42] [INFO] GameLogger initialized
-[2025-12-11 00:10:47] [INFO] Nivel cargado exitosamente: levels/level3.txt
-[2025-12-11 00:10:50] [INFO] Nivel cargado exitosamente: levels/level3.txt
-[2025-12-11 00:10:54] [INFO] Nivel cargado exitosamente: levels/level3.txt
-[2025-12-11 00:10:58] [INFO] Nivel cargado exitosamente: levels/level3.txt
-[2025-12-11 00:11:02] [INFO] Nivel cargado exitosamente: levels/level3.txt
-[2025-12-11 00:11:14] [INFO] Nivel cargado exitosamente: levels/level4.txt
-[2025-12-11 00:11:19] [INFO] Nivel cargado exitosamente: levels/level4.txt
-[2025-12-11 00:11:36] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 06:21:02] [INFO] GameLogger initialized
+[2025-12-11 06:21:02] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 06:21:02] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 06:21:02] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 06:21:02] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 06:21:02] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 06:21:02] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 06:21:02] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 06:21:02] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 06:21:02] [INFO] Nivel cargado exitosamente: levels/level2.txt
+[2025-12-11 06:21:02] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 06:21:02] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 06:26:31] [INFO] GameLogger initialized
+[2025-12-11 06:27:04] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 06:27:44] [INFO] Nivel cargado exitosamente: levels/level2.txt
+[2025-12-11 20:16:45] [INFO] GameLogger initialized
+[2025-12-11 20:17:23] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 20:18:08] [GAME_ERROR] [INVALID_CONFIG] Invalid configuration 'PHASES'='0': Número de fases inválido en levels/level1.txt
+[INVALID_CONFIG] Invalid configuration 'PHASES'='0': Número de fases inválido en levels/level1.txt
+	at com.badice.domain.services.LevelLoader.validateConfig(LevelLoader.java:210)
+	at com.badice.domain.services.LevelLoader.loadLevelFromFile(LevelLoader.java:79)
+	at com.badice.domain.services.LevelLoader.loadLevel(LevelLoader.java:27)
+	at com.badice.domain.services.GameEngine.createLevel(GameEngine.java:298)
+	at com.badice.domain.services.GameEngine.createLevelWithColors(GameEngine.java:530)
+	at com.badice.domain.services.GameEngine.startNewGameWithColors(GameEngine.java:521)
+	at com.badice.presentation.controller.GameController.startNewGameWithColors(GameController.java:265)
+	at com.badice.presentation.controller.GameController.handleColorSelection(GameController.java:228)
+	at com.badice.presentation.controller.GameController.lambda$setupEventHandlers$10(GameController.java:92)
+	at java.desktop/javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:1972)
+	at java.desktop/javax.swing.AbstractButton$Handler.actionPerformed(AbstractButton.java:2314)
+	at java.desktop/javax.swing.DefaultButtonModel.fireActionPerformed(DefaultButtonModel.java:407)
+	at java.desktop/javax.swing.DefaultButtonModel.setPressed(DefaultButtonModel.java:262)
+	at java.desktop/javax.swing.plaf.basic.BasicButtonListener.mouseReleased(BasicButtonListener.java:279)
+	at java.desktop/java.awt.AWTEventMulticaster.mouseReleased(AWTEventMulticaster.java:299)
+	at java.desktop/java.awt.Component.processMouseEvent(Component.java:6576)
+	at java.desktop/javax.swing.JComponent.processMouseEvent(JComponent.java:3404)
+	at java.desktop/java.awt.Component.processEvent(Component.java:6341)
+	at java.desktop/java.awt.Container.processEvent(Container.java:2260)
+	at java.desktop/java.awt.Component.dispatchEventImpl(Component.java:4958)
+	at java.desktop/java.awt.Container.dispatchEventImpl(Container.java:2318)
+	at java.desktop/java.awt.Component.dispatchEvent(Component.java:4790)
+	at java.desktop/java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4917)
+	at java.desktop/java.awt.LightweightDispatcher.processMouseEvent(Container.java:4560)
+	at java.desktop/java.awt.LightweightDispatcher.dispatchEvent(Container.java:4501)
+	at java.desktop/java.awt.Container.dispatchEventImpl(Container.java:2304)
+	at java.desktop/java.awt.Window.dispatchEventImpl(Window.java:2671)
+	at java.desktop/java.awt.Component.dispatchEvent(Component.java:4790)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:725)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:702)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:113)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+	at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)
+[2025-12-11 20:18:22] [INFO] GameLogger initialized
+[2025-12-11 20:18:30] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 20:19:15] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 20:19:28] [INFO] Nivel cargado exitosamente: levels/level2.txt
+[2025-12-11 20:19:33] [INFO] Nivel cargado exitosamente: levels/level3.txt
+[2025-12-11 20:19:40] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:20:46] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 20:27:03] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:27:25] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:27:41] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 20:27:50] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:28:07] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:28:24] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 20:28:30] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 20:28:36] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:28:58] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 20:29:04] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:29:39] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:30:39] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:31:09] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:31:35] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:32:16] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:32:30] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:32:44] [INFO] Nivel cargado exitosamente: levels/level1.txt
+[2025-12-11 20:32:49] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:41:55] [INFO] GameLogger initialized
+[2025-12-11 20:42:03] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:42:14] [INFO] Nivel cargado exitosamente: levels/level4.txt
+[2025-12-11 20:42:21] [INFO] Nivel cargado exitosamente: levels/level4.txt

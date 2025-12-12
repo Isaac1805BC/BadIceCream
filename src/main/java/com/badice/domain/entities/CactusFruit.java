@@ -29,6 +29,14 @@ public class CactusFruit extends Fruit {
         return isDangerous;
     }
 
+    /**
+     * Verifica si el cactus mata al jugador al intentar recolectarlo.
+     * @return true si está en modo peligroso y debe matar al jugador
+     */
+    public boolean killsPlayerOnContact() {
+        return isDangerous;
+    }
+
     @Override
     public void collect() {
         if (!isDangerous) {

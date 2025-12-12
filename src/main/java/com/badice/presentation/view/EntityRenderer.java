@@ -48,7 +48,6 @@ public class EntityRenderer implements EntityVisitor {
         entity.accept(this);
     }
 
-    // --- Implementación de EntityVisitor ---
 
     @Override
     public void visit(Player player) {
@@ -195,7 +194,42 @@ public class EntityRenderer implements EntityVisitor {
     @Override
     public void visit(PineappleFruit fruit) { renderCommonFruit(fruit); }
     @Override
-    public void visit(CactusFruit fruit) { renderCommonFruit(fruit); }
+    public void visit(CactusFruit fruit) { 
+        renderCommonFruit(fruit);
+        
+        // Si está en modo peligroso, agregar indicación visual
+        if (fruit.isDangerous() && !fruit.isCollected()) {
+            // Dibujar un círculo negro semi-transparente con puas
+            currentGraphics.setColor(new Color(0, 0, 0, 150));
+            int spikeRadius = cellSize / 2 - 6;
+            int centerX = currentX + cellSize / 2;
+            int centerY = currentY + cellSize / 2;
+            
+            // Dibujar círculo negro central
+            currentGraphics.fillOval(centerX - spikeRadius/2, centerY - spikeRadius/2, 
+                                    spikeRadius, spikeRadius);
+            
+            // Dibujar puas alrededor (8 puas)
+            currentGraphics.setColor(new Color(50, 50, 50));
+            for (int i = 0; i < 8; i++) {
+                double angle = Math.toRadians(i * 45);
+                int[] xPoints = new int[3];
+                int[] yPoints = new int[3];
+                
+                // Base de la pua (en el círculo)
+                xPoints[0] = centerX + (int)(Math.cos(angle - 0.3) * spikeRadius/2);
+                yPoints[0] = centerY + (int)(Math.sin(angle - 0.3) * spikeRadius/2);
+                xPoints[1] = centerX + (int)(Math.cos(angle + 0.3) * spikeRadius/2);
+                yPoints[1] = centerY + (int)(Math.sin(angle + 0.3) * spikeRadius/2);
+                
+                // Punta de la pua (fuera del círculo)
+                xPoints[2] = centerX + (int)(Math.cos(angle) * (spikeRadius + 4));
+                yPoints[2] = centerY + (int)(Math.sin(angle) * (spikeRadius + 4));
+                
+                currentGraphics.fillPolygon(xPoints, yPoints, 3);
+            }
+        }
+    }
 
     // --- Blocks ---
 
